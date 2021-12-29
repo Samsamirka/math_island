@@ -48,18 +48,19 @@ def render_answer(self):  # ответ от системы(верный/неве
     pass
 
 
-class LengthSpoke:  # первое задание (spoke - спица)
-    def __init__(self):
+class Task:
+    def __init__(self, topic, number):
+        self.text, self.true_answer = generate_task(topic, number)
+
+    def render_exercise(self, surface):
         pass
 
-    def render_exercise_1(self):
-        pass
+    def check_answer(self, answer):
+        return answer == self.true_answer
 
-    def check_answer_1(self):
-        pass
 
-    def get_answer_1(self):
-        pass
+class LengthSpoke:
+    pass
 
 
 class SurfaceArea:  # второе задание
@@ -118,7 +119,7 @@ class PercentFabrics:  # пятое задание
         pass
 
 
-class ControlWork:
+"""class ControlWork:
     def __init__(self):
         pass
 
@@ -135,54 +136,59 @@ class ControlWork:
         def get_answer_control_1(self):
             pass
 
-    class SurfaceAreaControl:  # второе задание
-        def __init__(self):
-            pass
 
-        def render_exercise_control_2(self):
-            pass
+class SurfaceAreaControl:  # второе задание
+    def __init__(self):
+        pass
 
-        def check_answer_control_2(self):
-            pass
+    def render_exercise_control_2(self):
+        pass
 
-        def get_answer_control_2(self):
-            pass
+    def check_answer_control_2(self):
+        pass
 
-    class RadiusControl:  # третье задание
-        def __init__(self):
-            pass
+    def get_answer_control_2(self):
+        pass
 
-        def render_exercise_control_3(self):
-            pass
 
-        def check_answer_control_3(self):
-            pass
+class RadiusControl:  # третье задание
+    def __init__(self):
+        pass
 
-        def get_answer_control_3(self):
-            pass
+    def render_exercise_control_3(self):
+        pass
 
-    class AreaCupolaControl:  # четвертое задание
-        def __init__(self):
-            pass
+    def check_answer_control_3(self):
+        pass
 
-        def render_exercise_control_4(self):
-            pass
+    def get_answer_control_3(self):
+        pass
 
-        def check_answer_control_4(self):
-            pass
 
-        def get_answer_control_4(self):
-            pass
+class AreaCupolaControl:  # четвертое задание
+    def __init__(self):
+        pass
 
-    class PercentFabrics:  # пятое задание
-        def __init__(self):
-            pass
+    def render_exercise_control_4(self):
+        pass
 
-        def render_exercise_control_5(self):
-            pass
+    def check_answer_control_4(self):
+        pass
 
-        def check_answer_control_5(self):
-            pass
+    def get_answer_control_4(self):
+        pass
 
-        def get_answer_control_5(self):
-            pass
+
+class PercentFabrics:  # пятое задание
+    def __init__(self):
+        pass
+
+    def render_exercise_control_5(self):
+        pass
+
+    def check_answer_control_5(self):
+        pass
+
+    def get_answer_control_5(self):
+        pass
+"""
