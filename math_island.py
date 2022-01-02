@@ -10,11 +10,6 @@ NAMES_GIRLS = ['Лиза', 'Оля', 'Самира', 'Катя', 'Маша', 'Ю
 NAMES_BOYS_EDIT = ['Саши', 'Максима', 'Кирилла', 'Андрея', 'Вани', 'Пети', 'Коли', 'Бори', 'Серёжи']
 NAMES_GIRLS_EDIT = ['Лизы', 'Оли', 'Самиры', 'Кати', 'Маши', 'Юли', 'Ани', 'Леры', 'Вики', 'Насти']
 
-BOY = random.choice(NAMES_BOYS)
-GIRL = random.choice(NAMES_GIRLS)
-BOY_EDIT = NAMES_BOYS_EDIT[NAMES_BOYS.index(BOY)]
-GIRL_EDIT = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(GIRL)]
-
 
 class StartWindow:
     def __init__(self):
@@ -74,6 +69,11 @@ def generate_task(number):
     h = random.randint(24, 38)  # высота купола
     d = random.randint(90, 120)  # расстояние между концами спиц
 
+    boy = random.choice(NAMES_BOYS)
+    girl = random.choice(NAMES_GIRLS)
+    boy_edit = NAMES_BOYS_EDIT[NAMES_BOYS.index(boy)]
+    girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
+
     if number == 1:
         umbrella = random.randint(19, 30)
         handle = round(random.uniform(4, 10), 1)
@@ -81,15 +81,31 @@ def generate_task(number):
         return text.format(umbrella=umbrella, handle=handle), answer_1
     elif number == 2:
         h_2 = round(random.uniform(50, 70), 1)
-        l = ends  # сменяем название переменной, чтобы было проще ориентироваться в условие
-        s = (1 / 2) * l * h
+        s = (1 / 2) * ends * h
         answer_2 = round((s * 2))
-        return text.format(name=BOY, h=h_2), answer_2
+        return text.format(name=boy, h=h_2), answer_2
     elif number == 3:
         r = random.randint(25, 40)
         answer = (r ** 2 + (r * 2) ** 2) / (r * 2)
-        return text.format(name=BOY, r=r), answer
-
+        return text.format(name=boy, r=r), answer
+    elif number == 4:
+        answer = round(2 * 3.14 * h * (d / 2))
+        return text.format(girl=girl, girl_edit=girl_edit), answer  # В БАЗЕ ДАННЫХ НУЖНО ДОБАВИТЬ girl_edit
+    elif number == 5:
+        a = random.randint(30, 51)  # длина
+        b = random.randint(70, 151)  # ширина
+        num = random.randint(15, 31)  # количество зонтов
+        S = random.randint(600, 1301)
+        while a % 10 != 0 or b % 10 != 0 or S % 50 != 0:
+            a = random.randint(15, 41)
+            b = random.randint(60, 101)
+            S = random.randint(600, 1301)
+        alll = 12 * num  # тк 12 клиньев на одном зонте
+        wedges = (alll * S) / 10000  # клинья
+        roll = a * b * 0.01  # рулон
+        rest = round((roll - wedges), 2)  # обрезки
+        answer = round(((rest / roll) * 100), 2)
+        return text.format(a=a, b=b, num=num, S=S, girl=girl_edit, boy=boy_edit), answer
 
 
 class Task:
