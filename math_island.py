@@ -8,7 +8,8 @@ import sqlite3
 FPS = 50
 SIZE = WIDTH, HEIGHT = 1500, 937.5
 BACKGROUND = pygame.color.Color('black')
-text = ''
+TEXT = ''
+number = 0
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
@@ -33,6 +34,23 @@ def start_screen():
         clock.tick(FPS)
 
 
+def load_image(name, color_key=None):
+    fullname = os.path.join('data', name)
+    # если файл не существует, то выходим
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if color_key is not None:
+        image = image.convert()
+        if color_key == -1:
+            color_key = image.get_at((0, 0))
+        image.set_colorkey(color_key)
+    else:
+        image = image.convert_alpha()
+    return image
+
+
 NAMES_BOYS = ['Саша', 'Максим', 'Кирилл', 'Андрей', 'Ваня', 'Петя', 'Коля', 'Боря', 'Серёжа']
 NAMES_GIRLS = ['Лиза', 'Оля', 'Самира', 'Катя', 'Маша', 'Юля', 'Аня', 'Лера', 'Вика', 'Настя']
 NAMES_BOYS_EDIT = ['Саши', 'Максима', 'Кирилла', 'Андрея', 'Вани', 'Пети', 'Коли', 'Бори', 'Серёжи']
@@ -52,43 +70,33 @@ class StartWindow:
 
 class Island:
     def __init__(self):
-        pass
-
-    def theory_open(self):  # теория везде одинаковая
-        pass
-
-    def control_work_open(self):
-        pass
+        self.input_answer = TEXT
+        self.x = 40  # координата х для появления congratulations
+        self.y = 60  # координата y для появления congratulations
 
     def exercise_1_open(self):
-        pass
-
-    def exercise_2_open(self):
-        pass
-
-    def exercise_3_open(self):
-        pass
-
-    def exercise_4_open(self):
-        pass
-
-    def exercise_5_open(self):
-        pass
+        number = 1
+        # появляется условие задачи(получает из Task: text), персонаж, фон и тд
+        screen.blit(render_answer(), (self.x, self.y))
 
 
-def condition_open(self):  # эта функция повторяется в каждых классах заданий
+def render_answer():  # ответ от системы(верный/неверный ответ)
+    if Task.check_answer(TEXT):
+        # появление фейерверка на экране
+        return 'Всё верно! Получий заслуженные 10 хр :)'
+    else:
+        return 'Неверно, попробуй ещё разок ;('
+
+
+def condition_open():  # эта функция повторяется в каждых классах заданий
     pass
 
 
-def render_answer(self):  # ответ от системы(верный/неверный ответ)
-    pass
-
-
-def generate_task(number):
+def generate_task(id):
     con = sqlite3.connect('text_of_task_and_exercises.db')
     cur = con.cursor()
     text = cur.execute(f"""SELECT text FROM task_exercises 
-                    WHERE id = {number}""").fetchall()
+                    WHERE id = {id}""").fetchall()
     for i in text:
         for g in i:
             text = g
@@ -102,24 +110,24 @@ def generate_task(number):
     boy_edit = NAMES_BOYS_EDIT[NAMES_BOYS.index(boy)]
     girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
 
-    if number == 1:
+    if id == 1:
         umbrella = random.randint(19, 30)
         handle = round(random.uniform(4, 10), 1)
         answer_1 = 3 * (umbrella - handle)
         return text.format(umbrella=umbrella, handle=handle), answer_1
-    elif number == 2:
+    elif id == 2:
         h_2 = round(random.uniform(50, 70), 1)
         s = (1 / 2) * ends * h
         answer_2 = round((s * 2))
         return text.format(name=boy, h=h_2), answer_2
-    elif number == 3:
+    elif id == 3:
         r = random.randint(25, 40)
         answer = (r ** 2 + (r * 2) ** 2) / (r * 2)
         return text.format(name=boy, r=r), answer
-    elif number == 4:
+    elif id == 4:
         answer = round(2 * 3.14 * h * (d / 2))
         return text.format(girl=girl, girl_edit=girl_edit), answer  # В БАЗЕ ДАННЫХ НУЖНО ДОБАВИТЬ girl_edit
-    elif number == 5:
+    elif id == 5:
         a = random.randint(30, 51)  # длина
         b = random.randint(70, 151)  # ширина
         num = random.randint(15, 31)  # количество зонтов
@@ -143,7 +151,7 @@ class Task:
     def render_exercise(self, surface):
         pass
 
-    def check_answer(self, answer):
+    def check_answer(self, answer):  # answer = TEXT, возвращает True/False
         return answer == self.true_answer
 
 
@@ -160,12 +168,12 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                print(text)
-                text = ''
+                print(TEXT)
+                TEXT = ''
             elif event.key == pygame.K_BACKSPACE:
-                text = text[:-1]
+                TEXT = TEXT[:-1]
             else:
-                text += event.unicode
+                TEXT += event.unicode
     screen.fill(pygame.Color("black"))
     all_sprites.draw(screen)
     all_sprites.update()
