@@ -5,6 +5,34 @@ import random
 import sqlite3
 
 
+FPS = 50
+SIZE = WIDTH, HEIGHT = 1500, 937.5
+BACKGROUND = pygame.color.Color('black')
+text = ''
+
+pygame.init()
+screen = pygame.display.set_mode(SIZE)
+clock = pygame.time.Clock()
+
+all_sprites = pygame.sprite.Group()
+tiles_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+
+
+def start_screen():
+    background = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    screen.blit(background, (0, 0))
+    while True:
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT:
+                terminate()
+            elif ev.type == pygame.KEYDOWN or \
+                    ev.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 NAMES_BOYS = ['Саша', 'Максим', 'Кирилл', 'Андрей', 'Ваня', 'Петя', 'Коля', 'Боря', 'Серёжа']
 NAMES_GIRLS = ['Лиза', 'Оля', 'Самира', 'Катя', 'Маша', 'Юля', 'Аня', 'Лера', 'Вика', 'Настя']
 NAMES_BOYS_EDIT = ['Саши', 'Максима', 'Кирилла', 'Андрея', 'Вани', 'Пети', 'Коли', 'Бори', 'Серёжи']
@@ -117,3 +145,32 @@ class Task:
 
     def check_answer(self, answer):
         return answer == self.true_answer
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
+
+
+running = True
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                print(text)
+                text = ''
+            elif event.key == pygame.K_BACKSPACE:
+                text = text[:-1]
+            else:
+                text += event.unicode
+    screen.fill(pygame.Color("black"))
+    all_sprites.draw(screen)
+    all_sprites.update()
+    pygame.display.flip()
+
+    clock.tick(FPS)
+
+pygame.quit()
