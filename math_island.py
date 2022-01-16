@@ -4,11 +4,10 @@ import os
 import random
 import sqlite3
 
-
 FPS = 50
 SIZE = WIDTH, HEIGHT = 1500, 937.5
 BACKGROUND = pygame.color.Color('black')
-TEXT = ''
+text = ''
 number = 0
 
 pygame.init()
@@ -18,6 +17,11 @@ clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+
+
+def render_text(text: str, rect: pygame.rect.Rect) -> pygame.surface.Surface:
+    """возвращает text в виде картинки, вписанной в rect"""
+    pass
 
 
 def start_screen():
@@ -70,38 +74,57 @@ class StartWindow:
 
 class Island:
     def __init__(self):
-        self.input_answer = TEXT
+        self.input_answer = text
         self.x = 40  # координата х для появления congratulations
         self.y = 60  # координата y для появления congratulations
+        self.task = None
+        self.number = 0
+        self.won = False  # введеный ответ == правильному
+
+    def set_answer(self, answer):
+        self.input_answer = answer
 
     def exercise_1_open(self):
-        number = 1
-        # появляется условие задачи(получает из Task: text), персонаж, фон и тд
-        screen.blit(render_answer(), (self.x, self.y))
+        self.number = 1
+        self.task = Task(self.number)
+        render_text(self.task.text)
+        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
 
+    def get_result(self) -> pygame.surface.Surface:
+        """ответ от системы(верный/неверный ответ)"""
+        self.won = self.task.check_answer(self.input_answer)
+        if self.won:
+            return render_text('Всё верно! Получий заслуженные 10 хр :)')
+        else:
+            return render_text('Неверно, попробуй ещё разок ;(')
 
-def render_answer():  # ответ от системы(верный/неверный ответ)
-    if Task.check_answer(TEXT):
-        # появление фейерверка на экране
-        return 'Всё верно! Получий заслуженные 10 хр :)'
-    else:
-        return 'Неверно, попробуй ещё разок ;('
+    def render_result(self):
+        screen.blit(self.get_result(), (self.x, self.y))
+        # что-то вроде clear.self.input_answer
+        if self.won:
+            # запустить фейерверк
+            pass
 
 
 def condition_open():  # эта функция повторяется в каждых классах заданий
     pass
 
 
-def generate_task(id):
+def generate_task_1(text):
+    umbrella = random.randint(19, 30)
+    handle = round(random.uniform(4, 10), 1)
+    answer_1 = 3 * (umbrella - handle)
+    return text.format(umbrella=umbrella, handle=handle), answer_1
+
+
+def generate_task(id, **args):  # дописать каждый объект по типу ends; args нужны для того, чтобы эта функция работала
+    # как для задачек отдельно, так и для самостоятельной, тк в самостоятельной параметры в условиях не меняются
     con = sqlite3.connect('text_of_task_and_exercises.db')
     cur = con.cursor()
-    text = cur.execute(f"""SELECT text FROM task_exercises 
-                    WHERE id = {id}""").fetchall()
-    for i in text:
-        for g in i:
-            text = g
+    text = cur.execute("SELECT text FROM task_exercises WHERE id = ?", id).fetchone()
 
-    ends = random.randint(25, 33)  # расстояние между спицами
+    if 'ends' not in args:
+        args['ends'] = random.randint(25, 33)  # расстояние между спицами
     h = random.randint(24, 38)  # высота купола
     d = random.randint(90, 120)  # расстояние между концами спиц
 
@@ -111,13 +134,10 @@ def generate_task(id):
     girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
 
     if id == 1:
-        umbrella = random.randint(19, 30)
-        handle = round(random.uniform(4, 10), 1)
-        answer_1 = 3 * (umbrella - handle)
-        return text.format(umbrella=umbrella, handle=handle), answer_1
+        return generate_task_1(text)  # и так нужно написать еще 4 функции
     elif id == 2:
         h_2 = round(random.uniform(50, 70), 1)
-        s = (1 / 2) * ends * h
+        s = (1 / 2) * args['ends'] * h
         answer_2 = round((s * 2))
         return text.format(name=boy, h=h_2), answer_2
     elif id == 3:
@@ -145,7 +165,7 @@ def generate_task(id):
 
 
 class Task:
-    def __init__(self, number):
+    def __init__(self, number):  # number - номер задания, который получаем из exercise_номер_open()
         self.text, self.true_answer = generate_task(number)
 
     def render_exercise(self, surface):
@@ -161,19 +181,20 @@ def terminate():
 
 
 running = True
-
+island = Island()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                print(TEXT)
-                TEXT = ''
+                print(text)
+                text = ''
             elif event.key == pygame.K_BACKSPACE:
-                TEXT = TEXT[:-1]
+                text = text[:-1]
             else:
-                TEXT += event.unicode
+                text += event.unicode
+            island.set_answer(text)  # не забыть обновить текст до пустоты
     screen.fill(pygame.Color("black"))
     all_sprites.draw(screen)
     all_sprites.update()
