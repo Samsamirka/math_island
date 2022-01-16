@@ -6,11 +6,11 @@ import pygame
 # Изображение не получится загрузить
 # без предварительной инициализации pygame
 pygame.init()
-size = width, height = 500, 500
+size = width, height = 1250, 800
 screen = pygame.display.set_mode(size)
 # pygame.display.set_caption('myPicture')
 
-
+"""
 def load_image(name, color_key=None):
     full_name = os.path.join('data', name)
     # если файл не существует, то выходим
@@ -25,18 +25,28 @@ def load_image(name, color_key=None):
     else:
         image = image.convert_alpha()
     return image
+"""
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    # если файл не существует, то выходим
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    return image
 
 
 class draw_clouds(pygame.sprite.Sprite):
     image = load_image("fon_start.jpg")
     image_boom = load_image("fon_start.jpg")
-
+'''
     def __init__(self, *group):
         super().__init__(*group)
         self.image = draw_clouds.image
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(width)
-        self.rect.y = random.randrange(height)
+        self.rect.y = random.randrange(height)'''
 
 
 all_sprites = pygame.sprite.Group()
