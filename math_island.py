@@ -40,7 +40,6 @@ def start_screen():
 
 def load_image(name, color_key=None):
     fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
@@ -106,7 +105,7 @@ class Island:
             pass
 
 
-def condition_open():  # эта функция повторяется в каждых классах заданий
+def condition_open():  # эта функция повторяется в каждых классах
     pass
 
 
@@ -117,6 +116,32 @@ def generate_task_1(text):
     return text.format(umbrella=umbrella, handle=handle), answer_1
 
 
+def generate_task_2(text, ends, boy):
+    h_2 = round(random.uniform(50, 70), 1)
+    s = (1 / 2) * ends * h_2
+    answer_2 = round((s * 2))
+    return text.format(name=boy, h=h_2), answer_2
+
+
+def generate_task_3(text, r, boy):
+    answer = (r ** 2 + (r * 2) ** 2) / (r * 2)
+    return text.format(name=boy, r=r), answer
+
+
+def generate_task_4(text, h, d, girl, girl_edit):
+    answer = round(2 * 3.14 * h * (d / 2))
+    return text.format(girl=girl, girl_edit=girl_edit), answer  # В БАЗЕ ДАННЫХ НУЖНО ДОБАВИТЬ girl_edit
+
+
+def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
+    all_wedges = 12 * num  # тк 12 клиньев на одном зонте
+    wedges = (all_wedges * S) / 10000  # клинья
+    roll = a * b * 0.01  # рулон
+    rest = round((roll - wedges), 2)  # обрезки
+    answer = round(((rest / roll) * 100), 2)
+    return text.format(a=a, b=b, num=num, S=S, girl=girl_edit, boy=boy_edit), answer
+
+
 def generate_task(id, **args):  # дописать каждый объект по типу ends; args нужны для того, чтобы эта функция работала
     # как для задачек отдельно, так и для самостоятельной, тк в самостоятельной параметры в условиях не меняются
     con = sqlite3.connect('text_of_task_and_exercises.db')
@@ -125,8 +150,24 @@ def generate_task(id, **args):  # дописать каждый объект п�
 
     if 'ends' not in args:
         args['ends'] = random.randint(25, 33)  # расстояние между спицами
-    h = random.randint(24, 38)  # высота купола
-    d = random.randint(90, 120)  # расстояние между концами спиц
+    if 'h' not in args:
+        args['h'] = random.randint(24, 38)  # высота купола
+    if 'd' not in args:
+        args['d'] = random.randint(90, 120)  # расстояние между концами спиц
+    if 'h_2' not in args:
+        args['h_2'] = round(random.uniform(50, 70), 1)
+    if 'r' not in args:
+        args['r'] = random.randint(25, 40)
+    if 'a' not in args:
+        args['a'] = random.randint(30, 51)  # длина
+        args['b'] = random.randint(70, 151)  # ширина
+        args['S'] = random.randint(600, 1301)
+        while args['a'] % 10 != 0 or args['b'] % 10 != 0 or args['S'] % 50 != 0:
+            args['a'] = random.randint(30, 51)  # длина
+            args['b'] = random.randint(70, 151)  # ширина
+            args['S'] = random.randint(600, 1301)
+    if 'num' not in args:
+        args['num'] = random.randint(15, 31)  # количество зонтов
 
     boy = random.choice(NAMES_BOYS)
     girl = random.choice(NAMES_GIRLS)
@@ -136,32 +177,13 @@ def generate_task(id, **args):  # дописать каждый объект п�
     if id == 1:
         return generate_task_1(text)  # и так нужно написать еще 4 функции
     elif id == 2:
-        h_2 = round(random.uniform(50, 70), 1)
-        s = (1 / 2) * args['ends'] * h
-        answer_2 = round((s * 2))
-        return text.format(name=boy, h=h_2), answer_2
+        generate_task_2(text, args['ends'], boy)
     elif id == 3:
-        r = random.randint(25, 40)
-        answer = (r ** 2 + (r * 2) ** 2) / (r * 2)
-        return text.format(name=boy, r=r), answer
+        generate_task_3(text, args['r'], boy)
     elif id == 4:
-        answer = round(2 * 3.14 * h * (d / 2))
-        return text.format(girl=girl, girl_edit=girl_edit), answer  # В БАЗЕ ДАННЫХ НУЖНО ДОБАВИТЬ girl_edit
+        generate_task_4(text, args['h'], args['d'], girl, girl_edit)
     elif id == 5:
-        a = random.randint(30, 51)  # длина
-        b = random.randint(70, 151)  # ширина
-        num = random.randint(15, 31)  # количество зонтов
-        S = random.randint(600, 1301)
-        while a % 10 != 0 or b % 10 != 0 or S % 50 != 0:
-            a = random.randint(15, 41)
-            b = random.randint(60, 101)
-            S = random.randint(600, 1301)
-        alll = 12 * num  # тк 12 клиньев на одном зонте
-        wedges = (alll * S) / 10000  # клинья
-        roll = a * b * 0.01  # рулон
-        rest = round((roll - wedges), 2)  # обрезки
-        answer = round(((rest / roll) * 100), 2)
-        return text.format(a=a, b=b, num=num, S=S, girl=girl_edit, boy=boy_edit), answer
+        generate_task_5(text, args['num'], args['a'], args['b'], args['S'], girl_edit, boy_edit)
 
 
 class Task:
