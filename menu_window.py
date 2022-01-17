@@ -1,6 +1,5 @@
 import os
-import random
-
+import pygame_gui
 import pygame
 
 # Изображение не получится загрузить
@@ -8,9 +7,17 @@ import pygame
 pygame.init()
 size = width, height = 1250, 800
 screen = pygame.display.set_mode(size)
-# pygame.display.set_caption('myPicture')
+pygame.display.set_caption('myPicture')
 
-"""
+
+manager = pygame_gui.UIManager((800, 600))
+
+switch = pygame_gui.elements.UIButtn(
+    relative_rect=pygame.Rect((400, 300), (150, 100)),
+    text='поменять фон',
+    manager=manager
+)
+
 def load_image(name, color_key=None):
     full_name = os.path.join('data', name)
     # если файл не существует, то выходим
@@ -25,35 +32,24 @@ def load_image(name, color_key=None):
     else:
         image = image.convert_alpha()
     return image
-"""
-
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    return image
 
 
-class draw_clouds(pygame.sprite.Sprite):
+
+class Draw_clouds(pygame.sprite.Sprite):
     image = load_image("fon_start.jpg")
-    image_boom = load_image("fon_start.jpg")
-'''
+    cloud = load_image("cloud_left.jpg")
+
     def __init__(self, *group):
         super().__init__(*group)
-        self.image = draw_clouds.image
+        self.image = Draw_clouds.image
         self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(width)
-        self.rect.y = random.randrange(height)'''
 
 
 all_sprites = pygame.sprite.Group()
 
 
 for _ in range(50):
-    draw_clouds(all_sprites)
+    Draw_clouds(all_sprites)
 
 
 running = True
@@ -63,7 +59,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    # all_sprites.draw(screen)
+    all_sprites.draw(screen)
     pygame.display.flip()
 
 pygame.quit()
