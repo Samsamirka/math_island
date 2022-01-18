@@ -16,22 +16,22 @@ manager = pygame_gui.UIManager((HIGHT, WIDTH))
 
 new_game_btn = pygame_gui.elements.UIButton(
     # кнопка новой игры
-    relative_rect=pygame.Rect((400, 450), (300, 75)),
+    relative_rect=pygame.Rect((670, 500), (400, 65)),
     text='НАЧАТЬ ИГРУ',
     manager=manager
 )
 
 continue_game = pygame_gui.elements.UIButton(
     # кнопка продолжения игры
-    relative_rect=pygame.Rect((1100, 450), (300, 75)),
+    relative_rect=pygame.Rect((670, 410), (400, 65)),
     text='ПРОДОЛЖИТЬ',
     manager=manager
 )
 
 settings_btn = pygame_gui.elements.UIButton(
     # кнопка настроек(сейчас только переключает фон)
-    relative_rect=pygame.Rect((800, 460), (150, 60)),
-    text='настройки',
+    relative_rect=pygame.Rect((670, 590), (400, 65)),
+    text='НАСТРОЙКИ',
     manager=manager
 )
 
