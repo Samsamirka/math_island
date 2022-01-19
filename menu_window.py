@@ -5,15 +5,17 @@ import sys
 
 pygame.init()
 
-HIGHT, WIDTH = 1800, 1000
+HEIGHT, WIDTH = 1500, 937
 
-window_surface = pygame.display.set_mode((HIGHT, WIDTH))
+window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
 # screen = pygame.Surface((HIGHT, WIDTH))
 # screen.fill(pygame.Color('white'))
 screen = pygame.image.load('data/background.png')
+screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_height()//1.6))
 
-manager = pygame_gui.UIManager((HIGHT, WIDTH))
 
+manager = pygame_gui.UIManager((HEIGHT, WIDTH))
+'''
 new_game_btn = pygame_gui.elements.UIButton(
     # кнопка новой игры
     relative_rect=pygame.Rect((670, 500), (400, 65)),
@@ -34,9 +36,7 @@ settings_btn = pygame_gui.elements.UIButton(
     text='НАСТРОЙКИ',
     manager=manager
 )
-
-
-background = pygame.image.load('data/background.png')
+'''
 
 down_cloud = pygame.image.load('data/down_cloud.png')
 down_cloud = pygame.transform.scale(down_cloud, (down_cloud.get_width()//1.5, down_cloud.get_height()//1.5))
@@ -76,13 +76,13 @@ while running:
 
     # window_surface.blit(background, (0, 600))
 
-    window_surface.blit(down_cloud, (0, 500))
-    window_surface.blit(right_cloud, (1280, 10))
-    window_surface.blit(left_cloud, (0, 50))
+    window_surface.blit(sun, (450, 130))
+    window_surface.blit(sunlight, (390, 80))
+    window_surface.blit(text, (700, 200))
 
-    window_surface.blit(sun, (400, 100))
-    window_surface.blit(sunlight, (340, 50))
-    window_surface.blit(text, (600, 200))
+    window_surface.blit(down_cloud, (-10, 500))
+    window_surface.blit(right_cloud, (980, 100))
+    window_surface.blit(left_cloud, (0, 50))
 
     pygame.display.update()
 
