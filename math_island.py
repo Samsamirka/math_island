@@ -6,7 +6,7 @@ import sqlite3
 
 FPS = 50
 SIZE = WIDTH, HEIGHT = 1500, 937.5
-BACKGROUND = pygame.color.Color('black')
+BACKGROUND = pygame.color.Color('lightskyblue')
 text = ''
 number = 0
 
@@ -15,27 +15,12 @@ screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
+island_group = pygame.sprite.Group()
 
 
 def render_text(text: str, rect: pygame.rect.Rect) -> pygame.surface.Surface:
     """возвращает text в виде картинки, вписанной в rect"""
     pass
-
-
-def start_screen():
-    background = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
-    screen.blit(background, (0, 0))
-    while True:
-        for ev in pygame.event.get():
-            if ev.type == pygame.QUIT:
-                terminate()
-            elif ev.type == pygame.KEYDOWN or \
-                    ev.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
-        pygame.display.flip()
-        clock.tick(FPS)
 
 
 def load_image(name, color_key=None):
@@ -52,6 +37,59 @@ def load_image(name, color_key=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+TASKS_IMAGES = {
+    'first': load_image('1.png'),
+    'second': load_image('2.png'),
+    'third': load_image('3.png'),
+    'fourth': load_image('4.png'),
+    'fifth': load_image('5.png')
+}
+PLAYER_IMAGES = {
+    'money': load_image('Мешок денег.png'),
+    'title_island': load_image('Название острова.png')
+}
+
+
+def island_screen():
+    background = pygame.transform.scale(load_image('Остров.png'), (WIDTH, HEIGHT))
+    screen.fill(BACKGROUND)
+    screen.blit(background, (0, 0))
+    island_title = pygame.transform.scale(PLAYER_IMAGES['title_island'], (300, 107))
+    screen.blit(island_title, (0, 0))
+    money_bag = pygame.transform.scale(PLAYER_IMAGES['money'], (50, 79))
+    screen.blit(money_bag, (1260, 81.5))
+    load_tasks_sprites()
+    while True:
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT:
+                terminate()
+            elif ev.type == pygame.KEYDOWN or \
+                    ev.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def load_tasks_sprites():
+    image_task_1 = pygame.sprite.Sprite()
+    image_task_1.image = pygame.transform.scale(TASKS_IMAGES['first'], (60, 64))
+    all_sprites.add(image_task_1)
+    image_task_1.image.get_rect().x = 5
+    image_task_1.image.get_rect().rect.y = 20
+    image_task_2 = pygame.sprite.Sprite()
+    image_task_2.image = pygame.transform.scale(TASKS_IMAGES['second'], (60, 64))
+    all_sprites.add(image_task_2)
+    image_task_3 = pygame.sprite.Sprite()
+    image_task_3.image = pygame.transform.scale(TASKS_IMAGES['third'], (60, 64))
+    all_sprites.add(image_task_3)
+    image_task_4 = pygame.sprite.Sprite()
+    image_task_4.image = pygame.transform.scale(TASKS_IMAGES['fourth'], (60, 64))
+    all_sprites.add(image_task_4)
+    image_task_5 = pygame.sprite.Sprite()
+    image_task_5.image = pygame.transform.scale(TASKS_IMAGES['fifth'], (60, 64))
+    all_sprites.add(image_task_5)
 
 
 NAMES_BOYS = ['Саша', 'Максим', 'Кирилл', 'Андрей', 'Ваня', 'Петя', 'Коля', 'Боря', 'Серёжа']
@@ -226,8 +264,10 @@ def terminate():
     sys.exit()
 
 
+island_screen()
 running = True
 island = Island()
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -240,8 +280,7 @@ while running:
                 text = text[:-1]
             else:
                 text += event.unicode
-            island.set_answer(text)  # не забыть обновить текст до пустоты
-    screen.fill(pygame.Color("black"))
+            island.set_answer(text)  # использовали clear
     all_sprites.draw(screen)
     all_sprites.update()
     pygame.display.flip()
