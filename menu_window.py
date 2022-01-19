@@ -8,8 +8,8 @@ pygame.init()
 HEIGHT, WIDTH = 1500, 937
 
 window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
-# screen = pygame.Surface((HIGHT, WIDTH))
-# screen.fill(pygame.Color('white'))
+# screen = pygame.Surface((HEIGHT, WIDTH))
+# screen.fill(pygame.Color('black'))
 screen = pygame.image.load('data/background.png')
 screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_height()//1.6))
 
@@ -38,6 +38,23 @@ settings_btn = pygame_gui.elements.UIButton(
 )
 '''
 
+
+class Start_buttons(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('data/start_btn.png')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
+        self.rect = self.image.get_rect(center=(700, 500))
+
+
+class Settings_buttons(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('data/settings_btn.png')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
+        self.rect = self.image.get_rect(center=(700, 650))
+
+
 down_cloud = pygame.image.load('data/down_cloud.png')
 down_cloud = pygame.transform.scale(down_cloud, (down_cloud.get_width()//1.5, down_cloud.get_height()//1.5))
 right_cloud = pygame.image.load('data/right_cloud.png')
@@ -53,6 +70,9 @@ sunlight = pygame.transform.scale(sunlight, (sunlight.get_width()//2, sunlight.g
 text = pygame.image.load('data/mthislnd_text.png')
 text = pygame.transform.scale(text, (text.get_width()//2, text.get_height()//2))
 
+start_btn = Start_buttons()
+settings_btn = Settings_buttons()
+
 
 clock = pygame.time.Clock()
 running = True
@@ -61,20 +81,13 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        '''if event.type == pygame.USEREVENT:
-            if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == settings_btn:
-                    if mode == 'black':
-                        mode = 'white'
-                    else:
-                        mode = 'black'
-                    background.fill(pygame.Color(mode))'''
         manager.process_events(event)
     manager.update(time_delta)
     window_surface.blit(screen, (0, 0))
     manager.draw_ui(window_surface)
 
-    # window_surface.blit(background, (0, 600))
+    screen.blit(start_btn.image, start_btn.rect)
+    screen.blit(settings_btn.image, settings_btn.rect)
 
     window_surface.blit(sun, (450, 130))
     window_surface.blit(sunlight, (390, 80))
