@@ -89,6 +89,30 @@ class Island:
         render_text(self.task.text)
         # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
 
+    def exercise_2_open(self):
+        self.number = 2
+        self.task = Task(self.number)
+        render_text(self.task.text)
+        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
+
+    def exercise_3_open(self):
+        self.number = 3
+        self.task = Task(self.number)
+        render_text(self.task.text)
+        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
+
+    def exercise_4_open(self):
+        self.number = 4
+        self.task = Task(self.number)
+        render_text(self.task.text)
+        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
+
+    def exercise_5_open(self):
+        self.number = 5
+        self.task = Task(self.number)
+        render_text(self.task.text)
+        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
+
     def get_result(self) -> pygame.surface.Surface:
         """ответ от системы(верный/неверный ответ)"""
         self.won = self.task.check_answer(self.input_answer)
@@ -99,7 +123,7 @@ class Island:
 
     def render_result(self):
         screen.blit(self.get_result(), (self.x, self.y))
-        # что-то вроде clear.self.input_answer
+        self.input_answer.clear()
         if self.won:
             # запустить фейерверк
             pass
