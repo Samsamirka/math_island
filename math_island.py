@@ -14,7 +14,7 @@ pygame.init()
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 
-all_sprites = pygame.sprite.Group()
+island_sprites = pygame.sprite.Group()
 island_group = pygame.sprite.Group()
 
 
@@ -55,19 +55,20 @@ PLAYER_IMAGES = {
 def island_screen():
     background = pygame.transform.scale(load_image('Остров.png'), (WIDTH, HEIGHT))
     screen.fill(BACKGROUND)
-    screen.blit(background, (0, 0))
+    screen.blit(background, (10, 10))
     island_title = pygame.transform.scale(PLAYER_IMAGES['title_island'], (300, 107))
     screen.blit(island_title, (0, 0))
     money_bag = pygame.transform.scale(PLAYER_IMAGES['money'], (50, 79))
     screen.blit(money_bag, (1260, 81.5))
     load_tasks_sprites()
+    island_sprites.draw(screen)
     while True:
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 terminate()
             elif ev.type == pygame.KEYDOWN or \
                     ev.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
+                pass
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -75,10 +76,11 @@ def island_screen():
 def load_tasks_sprites():
     image_task_1 = pygame.sprite.Sprite()
     image_task_1.image = pygame.transform.scale(TASKS_IMAGES['first'], (60, 64))
-    all_sprites.add(image_task_1)
-    image_task_1.image.get_rect().x = 5
-    image_task_1.image.get_rect().rect.y = 20
-    image_task_2 = pygame.sprite.Sprite()
+    image_task_1.rect = image_task_1.image.get_rect()
+    image_task_1.image.get_rect().x = 263
+    image_task_1.image.get_rect().y = 265
+    island_sprites.add(image_task_1)
+    """image_task_2 = pygame.sprite.Sprite()
     image_task_2.image = pygame.transform.scale(TASKS_IMAGES['second'], (60, 64))
     all_sprites.add(image_task_2)
     image_task_3 = pygame.sprite.Sprite()
@@ -89,7 +91,7 @@ def load_tasks_sprites():
     all_sprites.add(image_task_4)
     image_task_5 = pygame.sprite.Sprite()
     image_task_5.image = pygame.transform.scale(TASKS_IMAGES['fifth'], (60, 64))
-    all_sprites.add(image_task_5)
+    all_sprites.add(image_task_5)"""
 
 
 NAMES_BOYS = ['Саша', 'Максим', 'Кирилл', 'Андрей', 'Ваня', 'Петя', 'Коля', 'Боря', 'Серёжа']
@@ -281,8 +283,8 @@ while running:
             else:
                 text += event.unicode
             island.set_answer(text)  # использовали clear
-    all_sprites.draw(screen)
-    all_sprites.update()
+    island_sprites.draw(screen)
+    island_sprites.update()
     pygame.display.flip()
 
     clock.tick(FPS)
