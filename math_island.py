@@ -9,13 +9,14 @@ SIZE = WIDTH, HEIGHT = 1500, 937.5
 BACKGROUND = pygame.color.Color('lightskyblue')
 text = ''
 number = 0
+experience = 0
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 
 island_sprites = pygame.sprite.Group()
-island_group = pygame.sprite.Group()
+control_sprite = pygame.sprite.Group()  # создать спрайт самостоятельной и добавить сюда; не забыть scale
 
 
 def render_text(text: str, rect: pygame.rect.Rect) -> pygame.surface.Surface:
@@ -44,7 +45,8 @@ TASKS_IMAGES = {
     'second': load_image('2.png'),
     'third': load_image('3.png'),
     'fourth': load_image('4.png'),
-    'fifth': load_image('5.png')
+    'fifth': load_image('5.png'),
+    'control': load_image('Самостоятельные.png')
 }
 PLAYER_IMAGES = {
     'money': load_image('Мешок денег.png'),
@@ -58,10 +60,11 @@ def island_screen():
     screen.blit(background, (10, 10))
     island_title = pygame.transform.scale(PLAYER_IMAGES['title_island'], (300, 107))
     screen.blit(island_title, (0, 0))
-    money_bag = pygame.transform.scale(PLAYER_IMAGES['money'], (50, 79))
+    money_bag = pygame.transform.scale(PLAYER_IMAGES['money'], (60, 79))
     screen.blit(money_bag, (1260, 81.5))
     load_tasks_sprites()
     island_sprites.draw(screen)
+    control_sprite.draw(screen)
     while True:
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
@@ -77,21 +80,39 @@ def load_tasks_sprites():
     image_task_1 = pygame.sprite.Sprite()
     image_task_1.image = pygame.transform.scale(TASKS_IMAGES['first'], (60, 64))
     image_task_1.rect = image_task_1.image.get_rect()
-    image_task_1.image.get_rect().x = 263
-    image_task_1.image.get_rect().y = 265
+    image_task_1.rect.x = 263
+    image_task_1.rect.y = 255
     island_sprites.add(image_task_1)
-    """image_task_2 = pygame.sprite.Sprite()
+    image_task_2 = pygame.sprite.Sprite()
     image_task_2.image = pygame.transform.scale(TASKS_IMAGES['second'], (60, 64))
-    all_sprites.add(image_task_2)
+    image_task_2.rect = image_task_2.image.get_rect()
+    image_task_2.rect.x = 587
+    image_task_2.rect.y = 390
+    island_sprites.add(image_task_2)
     image_task_3 = pygame.sprite.Sprite()
     image_task_3.image = pygame.transform.scale(TASKS_IMAGES['third'], (60, 64))
-    all_sprites.add(image_task_3)
+    image_task_3.rect = image_task_3.image.get_rect()
+    image_task_3.rect.x = 799.7
+    image_task_3.rect.y = 354.6
+    island_sprites.add(image_task_3)
     image_task_4 = pygame.sprite.Sprite()
     image_task_4.image = pygame.transform.scale(TASKS_IMAGES['fourth'], (60, 64))
-    all_sprites.add(image_task_4)
+    image_task_4.rect = image_task_4.image.get_rect()
+    image_task_4.rect.x = 850.5
+    image_task_4.rect.y = 580
+    island_sprites.add(image_task_4)
     image_task_5 = pygame.sprite.Sprite()
     image_task_5.image = pygame.transform.scale(TASKS_IMAGES['fifth'], (60, 64))
-    all_sprites.add(image_task_5)"""
+    image_task_5.rect = image_task_5.image.get_rect()
+    image_task_5.rect.x = 668.9
+    image_task_5.rect.y = 560.3
+    island_sprites.add(image_task_5)
+    control_image = pygame.sprite.Sprite()
+    control_image.image = pygame.transform.scale(TASKS_IMAGES['control'], (60, 64))
+    control_image.rect = control_image.image.get_rect()
+    control_image.rect.x = 1110
+    control_image.rect.y = 244.9
+    control_sprite.add(control_image)
 
 
 NAMES_BOYS = ['Саша', 'Максим', 'Кирилл', 'Андрей', 'Ваня', 'Петя', 'Коля', 'Боря', 'Серёжа']
@@ -109,6 +130,31 @@ class StartWindow:
 
     def settings_open(self):
         pass
+
+
+def update(*args):
+    count = 0
+    for button in island_sprites:
+        count += 1
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
+            generate_task(count)
+    for btn in control_sprite:
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
+            ends = random.randint(25, 33)  # расстояние между спицами
+            h = random.randint(24, 38)  # высота купола
+            d = random.randint(90, 120)  # расстояние между концами спиц
+            h_2 = round(random.uniform(50, 70), 1)
+            r = random.randint(25, 40)
+            a = random.randint(30, 51)  # длина
+            b = random.randint(70, 151)  # ширина
+            S = random.randint(600, 1301)
+            while a % 10 != 0 or b % 10 != 0 or S % 50 != 0:
+                a = random.randint(30, 51)  # длина
+                b = random.randint(70, 151)  # ширина
+                S = random.randint(600, 1301)
+            num = random.randint(15, 31)
+            generate_task(count, ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num)
+    count = 0
 
 
 class Island:
@@ -169,10 +215,6 @@ class Island:
             pass
 
 
-def condition_open():  # эта функция повторяется в каждых классах
-    pass
-
-
 def generate_task_1(text):
     umbrella = random.randint(19, 30)
     handle = round(random.uniform(4, 10), 1)
@@ -206,8 +248,7 @@ def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
     return text.format(a=a, b=b, num=num, S=S, girl=girl_edit, boy=boy_edit), answer
 
 
-def generate_task(id, **args):  # дописать каждый объект по типу ends; args нужны для того, чтобы эта функция работала
-    # как для задачек отдельно, так и для самостоятельной, тк в самостоятельной параметры в условиях не меняются
+def generate_task(id, **args):
     con = sqlite3.connect('text_of_task_and_exercises.db')
     cur = con.cursor()
     text = cur.execute("SELECT text FROM task_exercises WHERE id = ?", id).fetchone()
@@ -272,6 +313,7 @@ island = Island()
 
 while running:
     for event in pygame.event.get():
+        island_sprites.update(event)
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
