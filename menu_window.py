@@ -21,8 +21,8 @@ screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_hei
 manager = pygame_gui.UIManager((HEIGHT, WIDTH))
 
 
-# pygame.mixer.music.load('data/')  # добавить музыку
-# pygame.mixer.music.play(-1, 0.0)
+pygame.mixer.music.load('data/music.mp3')
+pygame.mixer.music.play(-1, 0.0)
 music_playing = True
 
 all_btns = pygame.sprite.Group()
