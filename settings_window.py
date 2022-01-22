@@ -24,9 +24,9 @@ left_cloud = pygame.image.load('data/left_cloud.png')
 left_cloud = pygame.transform.scale(left_cloud, (left_cloud.get_width()//1.5, left_cloud.get_height()//1.5))
 
 
-set_r = pygame.image.load('data/set_wn.png')
+set_r = pygame.image.load('data/setn_wn.png')
 set_r = pygame.transform.scale(set_r, (set_r.get_width() // 2, set_r.get_height() // 2))
-authors = pygame.image.load('data/autors.png')
+authors = pygame.image.load('data/authors.png')
 authors = pygame.transform.scale(authors, (authors.get_width() // 2, authors.get_height() // 2))
 name1 = pygame.image.load('data/name_s.png')
 name1 = pygame.transform.scale(name1, (name1.get_width() // 2, name1.get_height() // 2))
@@ -35,15 +35,40 @@ name2 = pygame.transform.scale(name2, (name2.get_width() // 2, name2.get_height(
 name3 = pygame.image.load('data/name_o.png')
 name3 = pygame.transform.scale(name3, (name3.get_width() // 2, name3.get_height() // 2))
 
-set_txt = pygame.image.load('data/set_txt.png')
+set_txt = pygame.image.load('data/settings+txt.png')
 set_txt = pygame.transform.scale(set_txt, (set_txt.get_width() // 2, set_txt.get_height() // 2))
-mus_txt = pygame.image.load('data/mus_txt.png')
+
+mus_txt = pygame.image.load('data/music_txt.png')
 mus_txt = pygame.transform.scale(mus_txt, (mus_txt.get_width() // 2, mus_txt.get_height() // 2))
 
-off_m = pygame.image.load('data/mus_off.png')
-off_m = pygame.transform.scale(off_m, (off_m.get_width() // 2, off_m.get_height() // 2))
-on_m = pygame.image.load('data/mus_on.png')
-on_m = pygame.transform.scale(on_m, (on_m.get_width() // 2, on_m.get_height() // 2))
+
+class Off_buttons(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('data/btn_off.png')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
+        self.rect = self.image.get_rect(center=(820, 325))
+
+
+class On_buttons(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('data/btn_on.png')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
+        self.rect = self.image.get_rect(center=(940, 325))
+
+
+class Back_buttons(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('data/back_btn.png')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
+        self.rect = self.image.get_rect(center=(1450, 50))
+
+
+back = Back_buttons()
+on_music = On_buttons()
+off_music = Off_buttons()
 
 
 clock = pygame.time.Clock()
@@ -73,8 +98,9 @@ while running:
 
     window_surface.blit(mus_txt, (600, 320))
 
-    window_surface.blit(off_m, (770, 305))
-    window_surface.blit(on_m, (890, 305))
+    screen.blit(off_music.image, off_music.rect)
+    screen.blit(on_music.image, on_music.rect)
+    screen.blit(back.image, back.rect)
 
     pygame.display.update()
 
