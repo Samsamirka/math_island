@@ -5,6 +5,10 @@ import sys
 
 pygame.init()
 
+import start_game
+
+import settings_window
+
 HEIGHT, WIDTH = 1500, 937
 
 window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
@@ -17,9 +21,11 @@ screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_hei
 manager = pygame_gui.UIManager((HEIGHT, WIDTH))
 
 
-pygame.mixer.music.load('data/')  # добавить музыку
-pygame.mixer.music.play(-1, 0.0)
-musicPlaying = True
+# pygame.mixer.music.load('data/')  # добавить музыку
+# pygame.mixer.music.play(-1, 0.0)
+music_playing = True
+
+all_btns = pygame.sprite.Group()
 
 
 class Clouds(pygame.sprite.Group):
@@ -35,18 +41,27 @@ class Clouds(pygame.sprite.Group):
 
 class Start_buttons(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__()
+        super().__init__(all_btns)
         self.image = pygame.image.load('data/start_btn.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
         self.rect = self.image.get_rect(center=(700, 500))
 
+    def update(self, clock, *args):
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
+            game = start_game.start(clock)
+
 
 class Settings_buttons(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__()
+        super().__init__(all_btns)
         self.image = pygame.image.load('data/settings_btn.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
         self.rect = self.image.get_rect(center=(700, 650))
+
+    def update(self, clock, *args):
+        global music_playing
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
+            music_playing = settings_window.open_settings(clock, music_playing)
 
 
 down_cloud = pygame.image.load('data/down_cloud.png')
@@ -68,29 +83,27 @@ start_btn = Start_buttons()
 settings_btn = Settings_buttons()
 
 
-clock = pygame.time.Clock()
-running = True
-while running:
-    time_delta = clock.tick(60) / 1000.0
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        manager.process_events(event)
-    manager.update(time_delta)
-    window_surface.blit(screen, (0, 0))
-    manager.draw_ui(window_surface)
+def menu_w(clock: pygame.time.Clock):
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            all_btns.update(clock, event)
+        window_surface.blit(screen, (0, 0))
+        manager.draw_ui(window_surface)
 
-    screen.blit(start_btn.image, start_btn.rect)
-    screen.blit(settings_btn.image, settings_btn.rect)
+        screen.blit(start_btn.image, start_btn.rect)
+        screen.blit(settings_btn.image, settings_btn.rect)
 
-    window_surface.blit(sun, (450, 130))
-    window_surface.blit(sunlight, (390, 80))
-    window_surface.blit(text, (700, 200))
+        window_surface.blit(sun, (450, 130))
+        window_surface.blit(sunlight, (390, 80))
+        window_surface.blit(text, (700, 200))
 
-    window_surface.blit(down_cloud, (-10, 500))
-    window_surface.blit(right_cloud, (980, 100))
-    window_surface.blit(left_cloud, (0, 50))
+        window_surface.blit(down_cloud, (-10, 500))
+        window_surface.blit(right_cloud, (980, 100))
+        window_surface.blit(left_cloud, (0, 50))
 
-    pygame.display.update()
+        pygame.display.update()
 
-pygame.quit()
+    pygame.quit()
