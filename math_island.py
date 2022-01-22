@@ -21,7 +21,11 @@ control_sprite = pygame.sprite.Group()  # создать спрайт самос
 
 def render_text(text: str, rect: pygame.rect.Rect) -> pygame.surface.Surface:
     """возвращает text в виде картинки, вписанной в rect"""
-    pass
+    font = pygame.font.Font('ofont.ru_AsylbekM29.kz.ttf', 25)
+    texting = font.render(text, True, (0, 5, 0))
+    backgrnd = load_image('Город с дождем.jpg')
+    backgrnd.blit(texting, (0, 0))
+    return screen.blit(backgrnd, (0, 0))
 
 
 def load_image(name, color_key=None):
@@ -132,7 +136,7 @@ class StartWindow:
         pass
 
 
-def update(*args):
+def get_event(*args):
     count = 0
     for button in island_sprites:
         count += 1
@@ -201,8 +205,10 @@ class Island:
 
     def get_result(self) -> pygame.surface.Surface:
         """ответ от системы(верный/неверный ответ)"""
+        global experience
         self.won = self.task.check_answer(self.input_answer)
         if self.won:
+            experience += 10
             return render_text('Всё верно! Получий заслуженные 10 хр :)')
         else:
             return render_text('Неверно, попробуй ещё разок ;(')
@@ -280,7 +286,7 @@ def generate_task(id, **args):
     girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
 
     if id == 1:
-        return generate_task_1(text)  # и так нужно написать еще 4 функции
+        generate_task_1(text)  # и так нужно написать еще 4 функции
     elif id == 2:
         generate_task_2(text, args['ends'], boy)
     elif id == 3:
@@ -316,6 +322,8 @@ while running:
         island_sprites.update(event)
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            get_event(event)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 print(text)
@@ -326,7 +334,6 @@ while running:
                 text += event.unicode
             island.set_answer(text)  # использовали clear
     island_sprites.draw(screen)
-    island_sprites.update()
     pygame.display.flip()
 
     clock.tick(FPS)
