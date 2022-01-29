@@ -26,7 +26,16 @@ class Continued_game(pygame.sprite.Sprite):
 
     def update(self, *args):
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
-            pass
+            import sqlite3
+
+            con = sqlite3.connect("users.db")
+
+            cur = con.cursor()
+
+            users_id = cur.execute("""SELECT * FROM users MAX(id)""")
+            result = cur.execute("""SELECT * FROM users WHERE id == """ + str(id) + '"""')
+
+            con.close()
 
 
 class New_game(pygame.sprite.Sprite):
@@ -38,7 +47,13 @@ class New_game(pygame.sprite.Sprite):
 
     def update(self, *args):
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
-            pass
+            import sqlite3
+
+            con = sqlite3.connect("users.db")
+
+            cur = con.cursor()
+
+            delt = """DELETE FROM users"""
 
 
 cont = Continued_game()
