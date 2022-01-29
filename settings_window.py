@@ -12,6 +12,8 @@ screen = pygame.image.load('data/background.png')
 screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_height()//1.6))
 
 to_return = False
+
+pygame.mixer.music.load('data/music.mp3')
 music_playing = True
 
 manager = pygame_gui.UIManager((HEIGHT, WIDTH))
