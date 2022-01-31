@@ -10,6 +10,7 @@ BACKGROUND = pygame.color.Color('lightskyblue')
 text = ''
 number = 0
 experience = 0
+tasks = ['1.png', '2.png', '3.png', '4.png', '5.png']
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
@@ -19,13 +20,16 @@ island_sprites = pygame.sprite.Group()
 control_sprite = pygame.sprite.Group()  # создать спрайт самостоятельной и добавить сюда; не забыть scale
 
 
-def render_text(text: str, rect: pygame.rect.Rect) -> pygame.surface.Surface:
-    """возвращает text в виде картинки, вписанной в rect"""
+def render_text(text: str, number=None):  # number - номер аздания для его печати в диалоговом окне
+    """возвращает text в виде картинки на фоне города с дождем"""
     font = pygame.font.Font('ofont.ru_AsylbekM29.kz.ttf', 25)
-    texting = font.render(text, True, (0, 5, 0))
+    if number is not None:
+        num_task = font.render(str(number), True, (0, 5, 0))
+    else:
+        num_task = number
     backgrnd = load_image('Город с дождем.jpg')
-    backgrnd.blit(texting, (0, 0))
-    return screen.blit(backgrnd, (0, 0))
+    # TODO render text
+    return backgrnd.blit(num_task, (0, 0))
 
 
 def load_image(name, color_key=None):
@@ -45,12 +49,12 @@ def load_image(name, color_key=None):
 
 
 TASKS_IMAGES = {
-    'first': load_image('1.png'),
-    'second': load_image('2.png'),
-    'third': load_image('3.png'),
-    'fourth': load_image('4.png'),
-    'fifth': load_image('5.png'),
-    'control': load_image('Самостоятельные.png')
+    1: load_image('1.png'),
+    2: load_image('2.png'),
+    3: load_image('3.png'),
+    4: load_image('4.png'),
+    5: load_image('5.png'),
+    6: load_image('Самостоятельные.png')
 }
 PLAYER_IMAGES = {
     'money': load_image('Мешок денег.png'),
@@ -65,58 +69,35 @@ def island_screen():
     island_title = pygame.transform.scale(PLAYER_IMAGES['title_island'], (300, 107))
     screen.blit(island_title, (0, 0))
     money_bag = pygame.transform.scale(PLAYER_IMAGES['money'], (60, 79))
-    screen.blit(money_bag, (1260, 81.5))
+    screen.blit(money_bag, (1260, 81))
     load_tasks_sprites()
     island_sprites.draw(screen)
     control_sprite.draw(screen)
-    while True:
-        for ev in pygame.event.get():
-            if ev.type == pygame.QUIT:
-                terminate()
-            elif ev.type == pygame.KEYDOWN or \
-                    ev.type == pygame.MOUSEBUTTONDOWN:
-                pass
-        pygame.display.flip()
-        clock.tick(FPS)
+
+
+class IslandImage(pygame.sprite.Sprite):
+    def __init__(self, task_id, coordinates):
+        super().__init__(island_sprites)
+        self.task_id = task_id
+        self.image = pygame.transform.scale(TASKS_IMAGES[task_id], (60, 64))
+        self.rect = self.image.get_rect()
+        self.rect.x = coordinates[0]
+        self.rect.y = coordinates[1]
+
+
+ISLAND_COORDINATES = {
+    1: (263, 255),
+    2: (587, 390),
+    3: (800, 355),
+    4: (851, 580),
+    5: (669, 560),
+    6: (1110, 245)
+}
 
 
 def load_tasks_sprites():
-    image_task_1 = pygame.sprite.Sprite()
-    image_task_1.image = pygame.transform.scale(TASKS_IMAGES['first'], (60, 64))
-    image_task_1.rect = image_task_1.image.get_rect()
-    image_task_1.rect.x = 263
-    image_task_1.rect.y = 255
-    island_sprites.add(image_task_1)
-    image_task_2 = pygame.sprite.Sprite()
-    image_task_2.image = pygame.transform.scale(TASKS_IMAGES['second'], (60, 64))
-    image_task_2.rect = image_task_2.image.get_rect()
-    image_task_2.rect.x = 587
-    image_task_2.rect.y = 390
-    island_sprites.add(image_task_2)
-    image_task_3 = pygame.sprite.Sprite()
-    image_task_3.image = pygame.transform.scale(TASKS_IMAGES['third'], (60, 64))
-    image_task_3.rect = image_task_3.image.get_rect()
-    image_task_3.rect.x = 799.7
-    image_task_3.rect.y = 354.6
-    island_sprites.add(image_task_3)
-    image_task_4 = pygame.sprite.Sprite()
-    image_task_4.image = pygame.transform.scale(TASKS_IMAGES['fourth'], (60, 64))
-    image_task_4.rect = image_task_4.image.get_rect()
-    image_task_4.rect.x = 850.5
-    image_task_4.rect.y = 580
-    island_sprites.add(image_task_4)
-    image_task_5 = pygame.sprite.Sprite()
-    image_task_5.image = pygame.transform.scale(TASKS_IMAGES['fifth'], (60, 64))
-    image_task_5.rect = image_task_5.image.get_rect()
-    image_task_5.rect.x = 668.9
-    image_task_5.rect.y = 560.3
-    island_sprites.add(image_task_5)
-    control_image = pygame.sprite.Sprite()
-    control_image.image = pygame.transform.scale(TASKS_IMAGES['control'], (60, 64))
-    control_image.rect = control_image.image.get_rect()
-    control_image.rect.x = 1110
-    control_image.rect.y = 244.9
-    control_sprite.add(control_image)
+    for task_id, coordinates in ISLAND_COORDINATES.items():
+        IslandImage(task_id, coordinates)
 
 
 NAMES_BOYS = ['Саша', 'Максим', 'Кирилл', 'Андрей', 'Ваня', 'Петя', 'Коля', 'Боря', 'Серёжа']
@@ -137,11 +118,9 @@ class StartWindow:
 
 
 def get_event(*args):
-    count = 0
     for button in island_sprites:
-        count += 1
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
-            generate_task(count)
+            Task(button.task_id)  # task_id должен быть записан при создании спрайта
     for btn in control_sprite:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
             ends = random.randint(25, 33)  # расстояние между спицами
@@ -157,7 +136,7 @@ def get_event(*args):
                 b = random.randint(70, 151)  # ширина
                 S = random.randint(600, 1301)
             num = random.randint(15, 31)
-            generate_task(count, ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num)
+            generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num)
     count = 0
 
 
@@ -173,34 +152,10 @@ class Island:
     def set_answer(self, answer):
         self.input_answer = answer
 
-    def exercise_1_open(self):
-        self.number = 1
+    def exercise_open(self, number):
+        self.number = number
         self.task = Task(self.number)
-        render_text(self.task.text)
-        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
-
-    def exercise_2_open(self):
-        self.number = 2
-        self.task = Task(self.number)
-        render_text(self.task.text)
-        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
-
-    def exercise_3_open(self):
-        self.number = 3
-        self.task = Task(self.number)
-        render_text(self.task.text)
-        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
-
-    def exercise_4_open(self):
-        self.number = 4
-        self.task = Task(self.number)
-        render_text(self.task.text)
-        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
-
-    def exercise_5_open(self):
-        self.number = 5
-        self.task = Task(self.number)
-        render_text(self.task.text)
+        screen.blit(render_text(self.task.text, self.number), (0, 0))
         # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
 
     def get_result(self) -> pygame.surface.Surface:
@@ -255,9 +210,10 @@ def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
 
 
 def generate_task(id, **args):
+    print('generate_task', id)
     con = sqlite3.connect('text_of_task_and_exercises.db')
     cur = con.cursor()
-    text = cur.execute("SELECT text FROM task_exercises WHERE id = ?", id).fetchone()
+    text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", id).fetchone())
 
     if 'ends' not in args:
         args['ends'] = random.randint(25, 33)  # расстояние между спицами
@@ -286,15 +242,17 @@ def generate_task(id, **args):
     girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
 
     if id == 1:
-        generate_task_1(text)  # и так нужно написать еще 4 функции
+        text, answer = generate_task_1(text)  # и так нужно написать еще 4 функции
     elif id == 2:
-        generate_task_2(text, args['ends'], boy)
+        text, answer = generate_task_2(text, args['ends'], boy)
     elif id == 3:
-        generate_task_3(text, args['r'], boy)
+        text, answer = generate_task_3(text, args['r'], boy)
     elif id == 4:
-        generate_task_4(text, args['h'], args['d'], girl, girl_edit)
+        text, answer = generate_task_4(text, args['h'], args['d'], girl, girl_edit)
     elif id == 5:
-        generate_task_5(text, args['num'], args['a'], args['b'], args['S'], girl_edit, boy_edit)
+        text, answer = generate_task_5(text, args['num'], args['a'], args['b'], args['S'], girl_edit, boy_edit)
+    island.exercise_open(id)
+    return text, answer
 
 
 class Task:
@@ -319,11 +277,9 @@ island = Island()
 
 while running:
     for event in pygame.event.get():
-        island_sprites.update(event)
+        get_event(event)
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            get_event(event)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 print(text)
