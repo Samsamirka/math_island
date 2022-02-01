@@ -20,7 +20,7 @@ island_sprites = pygame.sprite.Group()
 control_sprite = pygame.sprite.Group()  # создать спрайт самостоятельной и добавить сюда; не забыть scale
 
 
-def render_text(text: str, number=None):  # number - номер аздания для его печати в диалоговом окне
+def render_text(text, number=None):  # number - номер аздания для его печати в диалоговом окне
     """возвращает text в виде картинки на фоне города с дождем"""
     font = pygame.font.Font('ofont.ru_AsylbekM29.kz.ttf', 25)
     if number is not None:
@@ -118,7 +118,7 @@ class StartWindow:
 
 
 def get_event(*args):
-    for button in island_sprites:
+    for button in  IslandImage:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
             Task(button.task_id)  # task_id должен быть записан при создании спрайта
     for btn in control_sprite:
@@ -152,13 +152,13 @@ class Island:
     def set_answer(self, answer):
         self.input_answer = answer
 
-    def exercise_open(self, number):
+    def exercise_open(self, number, text_task):
         self.number = number
-        self.task = Task(self.number)
+        self.task = text_task
         screen.blit(render_text(self.task.text, self.number), (0, 0))
         # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
 
-    def get_result(self) -> pygame.surface.Surface:
+    def get_result(self):
         """ответ от системы(верный/неверный ответ)"""
         global experience
         self.won = self.task.check_answer(self.input_answer)
@@ -251,7 +251,7 @@ def generate_task(id, **args):
         text, answer = generate_task_4(text, args['h'], args['d'], girl, girl_edit)
     elif id == 5:
         text, answer = generate_task_5(text, args['num'], args['a'], args['b'], args['S'], girl_edit, boy_edit)
-    island.exercise_open(id)
+    island.exercise_open(id, text)
     return text, answer
 
 
