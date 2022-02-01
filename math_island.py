@@ -118,7 +118,7 @@ class StartWindow:
 
 
 def get_event(*args):
-    for button in  IslandImage:
+    for button in  # IslandImage:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
             Task(button.task_id)  # task_id должен быть записан при создании спрайта
     for btn in control_sprite:
