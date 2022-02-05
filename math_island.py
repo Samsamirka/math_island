@@ -24,6 +24,7 @@ next_sprite = pygame.sprite.Group()
 
 def render_text_task(text, number=None):  # number - номер аздания для его печати в диалоговом окне
     """возвращает text в виде картинки на фоне города с дождем"""
+    global backgrnd
     count = 0
     y = 0
     string = ''
@@ -38,13 +39,11 @@ def render_text_task(text, number=None):  # number - номер аздания �
     text = text[2:-3]
     text = text.split()
     for word in text:
-        print(text.index(word))
         count += 1
         string += word
         string += ' '
         text_task = font.render(str(string), True, (0, 0, 0))
         if text_task.get_size()[0] > 1200:
-            a = text_task.get_size()[0]
             string = string[:-(len(word) + 1)]
             text_task = font.render(str(string), True, (0, 0, 0))
             backgrnd.blit(text_task, (100, 650 + y))
@@ -151,11 +150,13 @@ class StartWindow:
 
 
 def get_event(*args):
+    global task_made
     for button in tasks:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
             Task(button.task_id)  # task_id должен быть записан при создании спрайта
     for arrow in next:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
+            task_made = False
             island_screen()
     for btn in control_sprite:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
@@ -183,12 +184,12 @@ class Island:
         self.task = None
         self.number = 0
         self.won = False  # введеный ответ == правильному
-        self.next_button = load_image('Стрелка.png')
-        self.next_button = pygame.transform.scale(self.next_button.image, (60, 64))
         self.next_button = pygame.sprite.Sprite()
-        self.rect = self.next_button.image.get_rect()
-        self.rect.x = 1216
-        self.rect.y = 835
+        self.next_button.image = load_image('Стрелка.png')
+        self.next_button.image = pygame.transform.scale(self.next_button.image, (70, 70))
+        self.next_button.rect = self.next_button.image.get_rect()
+        self.next_button.rect.x = 1220
+        self.next_button.rect.y = 830
         next_sprite.add(self.next_button)
         next = [self.next_button]
 
@@ -204,19 +205,32 @@ class Island:
     def get_result(self):
         """ответ от системы(верный/неверный ответ)"""
         global experience
-        self.won = self.task.check_answer(self.input_answer)
-        if self.won:
+        global backgrnd
+        print(number)
+        font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+        self.won = Task(number).check_answer(self.input_answer)
+        if self.won and not task_made:  # task_made - проверка на выполненность задания, чтобы не получать бесконечное количество награды
+            # должен переключаться до нажатия энтер
             experience += 10
-            return render_text('Всё верно! Получий заслуженные 10 хр :)')
-        else:
-            return render_text('Неверно, попробуй ещё разок ;(')
-
-    def render_result(self):
-        screen.blit(self.get_result(), (self.x, self.y))
-        self.input_answer.clear()
-        if self.won:
-            # запустить фейерверк
-            pass
+            final = 'Всё верно! Получи 10 xp :)'
+            result = font.render(final, True, (255, 255, 255))
+            backgrnd.blit(result, (10, 10))
+            screen.blit(backgrnd, (0, 0))
+        elif not self.won and not task_made:
+            final = 'К сожалению, неверно. Попробуй ещё разок! Ты теряешь 10 xp ;('
+            result = font.render(final, True, (255, 255, 255))
+            backgrnd.blit(result, (10, 10))
+            screen.blit(backgrnd, (0, 0))
+        elif self.won and task_made:
+            final = 'Всё верно! Получи 10 xp :)'
+            result = font.render(final, True, (255, 255, 255))
+            backgrnd.blit(result, (10, 10))
+            screen.blit(backgrnd, (0, 0))
+        elif not self.won and task_made:
+            final = 'К сожалению, неверно. Попробуй ещё разок! Ты теряешь 10 xp ;('
+            result = font.render(final, True, (255, 255, 255))
+            backgrnd.blit(result, (10, 10))
+            screen.blit(backgrnd, (0, 0))
 
 
 def generate_task_1(text):
@@ -254,6 +268,7 @@ def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
 
 def generate_task(id, **args):
     global answer
+    global number
     con = sqlite3.connect('text_of_task_and_exercises.db')
     cur = con.cursor()
     text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", (id,)).fetchone())
@@ -295,15 +310,13 @@ def generate_task(id, **args):
     elif id == 5:
         text, answer = generate_task_5(text, args['num'], args['a'], args['b'], args['S'], girl_edit, boy_edit)
     island.exercise_open(id, text)
+    number = id
     return text, answer
 
 
 class Task:
-    def __init__(self, number):  # number - номер задания, который получаем из exercise_номер_open()
+    def __init__(self, number=None):  # number - номер задания, который получаем из exercise_номер_open()
         self.text, self.true_answer = generate_task(number)
-
-    def render_exercise(self, surface):
-        pass
 
     def check_answer(self, answer):  # answer = TEXT, возвращает True/False
         return answer == self.true_answer
@@ -313,7 +326,7 @@ def terminate():
     pygame.quit()
     sys.exit()
 
-
+backgrnd = pygame.transform.scale(load_image('фон_для_задания.jpeg'), (1500, 937))
 island_screen()
 running = True
 island = Island()
@@ -326,11 +339,15 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_BACKSPACE:
                 input_text = input_text[:-1]
-            elif event.key == pygame.K_KP_ENTER:
-
+                font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                from_player = font.render(input_text, True, (0, 0, 0))
+                # вывод на экран ввод человека
+            elif event.key == pygame.K_RETURN:
+                task_made = True
+                print(input_text)
+                island.set_answer(input_text)  # использовали clear
             else:
                 input_text += event.unicode
-                island.set_answer(input_text)  # использовали clear
     pygame.display.flip()
 
     clock.tick(FPS)
