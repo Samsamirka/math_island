@@ -149,33 +149,6 @@ class StartWindow:
         pass
 
 
-def get_event(*args):
-    global task_made
-    for button in tasks:
-        if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
-            Task(button.task_id)  # task_id должен быть записан при создании спрайта
-    for arrow in next:
-        if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
-            task_made = False
-            island_screen()
-    for btn in control_sprite:
-        if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
-            ends = random.randint(25, 33)  # расстояние между спицами
-            h = random.randint(24, 38)  # высота купола
-            d = random.randint(90, 120)  # расстояние между концами спиц
-            h_2 = round(random.uniform(50, 70), 1)
-            r = random.randint(25, 40)
-            a = random.randint(30, 51)  # длина
-            b = random.randint(70, 151)  # ширина
-            S = random.randint(600, 1301)
-            while a % 10 != 0 or b % 10 != 0 or S % 50 != 0:
-                a = random.randint(30, 51)  # длина
-                b = random.randint(70, 151)  # ширина
-                S = random.randint(600, 1301)
-            num = random.randint(15, 31)
-            generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num, id=6)
-
-
 class Island:
     def __init__(self):
         global next
@@ -208,7 +181,7 @@ class Island:
         global backgrnd
         print(number)
         font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-        self.won = Task(number).check_answer(self.input_answer)
+        self.won = self.task.check_answer(self.input_answer)
         if self.won and not task_made:  # task_made - проверка на выполненность задания, чтобы не получать бесконечное количество награды
             # должен переключаться до нажатия энтер
             experience += 10
@@ -232,11 +205,38 @@ class Island:
             backgrnd.blit(result, (10, 10))
             screen.blit(backgrnd, (0, 0))
 
+    def get_event(self, *args):
+        global task_made
+        for button in tasks:
+            if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
+                self.task = Task(button.task_id)  # task_id должен быть записан при создании спрайта
+        for arrow in next:
+            if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
+                task_made = False
+                island_screen()
+        for btn in control_sprite:
+            if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
+                ends = random.randint(25, 33)  # расстояние между спицами
+                h = random.randint(24, 38)  # высота купола
+                d = random.randint(90, 120)  # расстояние между концами спиц
+                h_2 = round(random.uniform(50, 70), 1)
+                r = random.randint(25, 40)
+                a = random.randint(30, 51)  # длина
+                b = random.randint(70, 151)  # ширина
+                S = random.randint(600, 1301)
+                while a % 10 != 0 or b % 10 != 0 or S % 50 != 0:
+                    a = random.randint(30, 51)  # длина
+                    b = random.randint(70, 151)  # ширина
+                    S = random.randint(600, 1301)
+                num = random.randint(15, 31)
+                generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num, id=6)
+
 
 def generate_task_1(text):
     umbrella = random.randint(19, 30)
     handle = round(random.uniform(4, 10), 1)
-    answer_1 = 3 * (umbrella - handle)
+    answer_1 = round((3 * (umbrella - handle)), 1)
+    print(answer_1)
     return text.format(umbrella=umbrella, handle=handle), answer_1
 
 
@@ -319,7 +319,7 @@ class Task:
         self.text, self.true_answer = generate_task(number)
 
     def check_answer(self, answer):  # answer = TEXT, возвращает True/False
-        return answer == self.true_answer
+        return float(answer) == self.true_answer
 
 
 def terminate():
@@ -333,7 +333,7 @@ island = Island()
 
 while running:
     for event in pygame.event.get():
-        get_event(event)
+        island.get_event(event)
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
@@ -346,6 +346,7 @@ while running:
                 task_made = True
                 print(input_text)
                 island.set_answer(input_text)  # использовали clear
+                input_text = ''
             else:
                 input_text += event.unicode
     pygame.display.flip()
