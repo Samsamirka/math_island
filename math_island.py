@@ -5,31 +5,62 @@ import random
 import sqlite3
 
 FPS = 50
-SIZE = WIDTH, HEIGHT = 1500, 937.5
+SIZE = WIDTH, HEIGHT = 1500, 937
 BACKGROUND = pygame.color.Color('lightskyblue')
-text = ''
+input_text = ''
 number = 0
 experience = 0
-tasks = ['1.png', '2.png', '3.png', '4.png', '5.png']
+tasks = []
+next = []
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 
 island_sprites = pygame.sprite.Group()
-control_sprite = pygame.sprite.Group()  # создать спрайт самостоятельной и добавить сюда; не забыть scale
+control_sprite = pygame.sprite.Group()
+next_sprite = pygame.sprite.Group()
 
 
-def render_text(text, number=None):  # number - номер аздания для его печати в диалоговом окне
+def render_text_task(text, number=None):  # number - номер аздания для его печати в диалоговом окне
     """возвращает text в виде картинки на фоне города с дождем"""
-    font = pygame.font.Font('ofont.ru_AsylbekM29.kz.ttf', 25)
+    count = 0
+    y = 0
+    string = ''
+    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 70)
     if number is not None:
-        num_task = font.render(str(number), True, (0, 5, 0))
+        num_task = font.render(str(number), True, (0, 0, 0))
     else:
         num_task = number
-    backgrnd = load_image('Город с дождем.jpg')
-    # TODO render text
-    return backgrnd.blit(num_task, (0, 0))
+    backgrnd = pygame.transform.scale(load_image('фон_для_задания.jpeg'), (1500, 937))
+    backgrnd.blit(num_task, (420, 545))
+    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 37)
+    text = text[2:-3]
+    text = text.split()
+    for word in text:
+        print(text.index(word))
+        count += 1
+        string += word
+        string += ' '
+        text_task = font.render(str(string), True, (0, 0, 0))
+        if text_task.get_size()[0] > 1200:
+            a = text_task.get_size()[0]
+            string = string[:-(len(word) + 1)]
+            text_task = font.render(str(string), True, (0, 0, 0))
+            backgrnd.blit(text_task, (100, 650 + y))
+            y += 35
+            count = 0
+            string = ''
+        elif text_task.get_size()[0] == 1200:
+            backgrnd.blit(text_task, (100, 650 + y))
+            y += 35
+            count = 0
+            string = ''
+        elif text_task.get_size()[0] < 1200 and text.index(word) == len(text) - 1:
+            backgrnd.blit(text_task, (100, 650 + y))
+    next_sprite.draw(backgrnd)
+    next_sprite.clear(screen, screen)
+    return backgrnd
 
 
 def load_image(name, color_key=None):
@@ -83,6 +114,8 @@ class IslandImage(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = coordinates[0]
         self.rect.y = coordinates[1]
+        global tasks
+        tasks.append(self)
 
 
 ISLAND_COORDINATES = {
@@ -118,9 +151,12 @@ class StartWindow:
 
 
 def get_event(*args):
-    for button in  # IslandImage:
+    for button in tasks:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
             Task(button.task_id)  # task_id должен быть записан при создании спрайта
+    for arrow in next:
+        if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
+            island_screen()
     for btn in control_sprite:
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
             ends = random.randint(25, 33)  # расстояние между спицами
@@ -136,27 +172,34 @@ def get_event(*args):
                 b = random.randint(70, 151)  # ширина
                 S = random.randint(600, 1301)
             num = random.randint(15, 31)
-            generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num)
-    count = 0
+            generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num, id=6)
 
 
 class Island:
     def __init__(self):
-        self.input_answer = text
-        self.x = 40  # координата х для появления congratulations
-        self.y = 60  # координата y для появления congratulations
+        global next
+        global next_sprite
+        self.input_answer = input_text
         self.task = None
         self.number = 0
         self.won = False  # введеный ответ == правильному
+        self.next_button = load_image('Стрелка.png')
+        self.next_button = pygame.transform.scale(self.next_button.image, (60, 64))
+        self.next_button = pygame.sprite.Sprite()
+        self.rect = self.next_button.image.get_rect()
+        self.rect.x = 1216
+        self.rect.y = 835
+        next_sprite.add(self.next_button)
+        next = [self.next_button]
 
     def set_answer(self, answer):
         self.input_answer = answer
+        self.get_result()
 
     def exercise_open(self, number, text_task):
         self.number = number
         self.task = text_task
-        screen.blit(render_text(self.task.text, self.number), (0, 0))
-        # появляется условие задачи(получает из self.task.text), персонаж, фон и тд
+        screen.blit(render_text_task(self.task, self.number), (0, 0))
 
     def get_result(self):
         """ответ от системы(верный/неверный ответ)"""
@@ -197,7 +240,7 @@ def generate_task_3(text, r, boy):
 
 def generate_task_4(text, h, d, girl, girl_edit):
     answer = round(2 * 3.14 * h * (d / 2))
-    return text.format(girl=girl, girl_edit=girl_edit), answer  # В БАЗЕ ДАННЫХ НУЖНО ДОБАВИТЬ girl_edit
+    return text.format(girl=girl, girl_edit=girl_edit), answer
 
 
 def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
@@ -210,10 +253,10 @@ def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
 
 
 def generate_task(id, **args):
-    print('generate_task', id)
+    global answer
     con = sqlite3.connect('text_of_task_and_exercises.db')
     cur = con.cursor()
-    text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", id).fetchone())
+    text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", (id,)).fetchone())
 
     if 'ends' not in args:
         args['ends'] = random.randint(25, 33)  # расстояние между спицами
@@ -281,15 +324,13 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
-                print(text)
-                text = ''
-            elif event.key == pygame.K_BACKSPACE:
-                text = text[:-1]
+            if event.key == pygame.K_BACKSPACE:
+                input_text = input_text[:-1]
+            elif event.key == pygame.K_KP_ENTER:
+
             else:
-                text += event.unicode
-            island.set_answer(text)  # использовали clear
-    island_sprites.draw(screen)
+                input_text += event.unicode
+                island.set_answer(input_text)  # использовали clear
     pygame.display.flip()
 
     clock.tick(FPS)
