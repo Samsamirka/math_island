@@ -1,7 +1,4 @@
 import pygame
-import pygame_gui
-import os
-import sys
 
 HEIGHT, WIDTH = 1500, 937
 
@@ -16,7 +13,6 @@ to_return = False
 pygame.mixer.music.load('data/music.mp3')
 music_playing = True
 
-manager = pygame_gui.UIManager((HEIGHT, WIDTH))
 
 down_cloud = pygame.image.load('data/down_cloud.png')
 down_cloud = pygame.transform.scale(down_cloud, (down_cloud.get_width()//1.5, down_cloud.get_height()//1.5))
@@ -91,7 +87,6 @@ def open_settings(clock: pygame.time.Clock, prev_music_playing):
                 return music_playing
             all_sprites.update(event)
         window_surface.blit(screen, (0, 0))
-        manager.draw_ui(window_surface)
 
         window_surface.blit(down_cloud, (-10, 500))
         window_surface.blit(right_cloud, (980, 100))

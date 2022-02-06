@@ -1,7 +1,4 @@
 import pygame
-import pygame_gui
-import os
-import sys
 
 pygame.init()
 
@@ -16,9 +13,6 @@ window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
 # screen.fill(pygame.Color('black'))
 screen = pygame.image.load('data/background.png')
 screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_height()//1.6))
-
-
-manager = pygame_gui.UIManager((HEIGHT, WIDTH))
 
 
 pygame.mixer.music.load('data/music.mp3')
@@ -91,7 +85,6 @@ def menu_w(clock: pygame.time.Clock):
                 running = False
             all_btns.update(clock, event)
         window_surface.blit(screen, (0, 0))
-        manager.draw_ui(window_surface)
 
         screen.blit(start_btn.image, start_btn.rect)
         screen.blit(settings_btn.image, settings_btn.rect)
