@@ -172,6 +172,10 @@ class Island:
 
     def set_answer(self, answer):
         self.input_answer = answer
+        try:
+            self.input_answer = str(float(self.input_answer))
+        except ValueError:
+            print('Вводить нужно числа/вместо запятой ставится точка')
         self.get_result()
 
     def exercise_open(self, number, text_task):
