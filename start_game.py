@@ -11,8 +11,6 @@ window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
 screen = pygame.image.load('data/new_fon.png')
 
 
-# text = pygame_gui.
-
 all_sprites = pygame.sprite.Group()
 
 
@@ -66,10 +64,29 @@ play = New_game()
 
 
 def start(clock: pygame.time.Clock):
+    input_text = ''
     running = True
-
     while running:
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    input_text = input_text[:-1]
+                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                    from_player = font.render(input_text, True, (0, 100, 0))
+                    pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
+                                                               from_player.get_height()))
+                    screen.blit(from_player, (100, 860))
+                elif event.key == pygame.K_RETURN:
+                    pass
+                else:
+                    input_text += event.unicode
+                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                    from_player = font.render(input_text, True, (0, 100, 0))
+                    screen.blit(from_player, (100, 860))
+
+            pygame.display.flip()
             if event.type == pygame.QUIT:
                 running = False
             all_sprites.update(event)
