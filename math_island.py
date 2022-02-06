@@ -12,6 +12,7 @@ number = 0
 experience = 0
 tasks = []
 next = []
+task_made = False
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
@@ -93,6 +94,7 @@ PLAYER_IMAGES = {
 
 
 def island_screen():
+    global experience
     background = pygame.transform.scale(load_image('Остров.png'), (WIDTH, HEIGHT))
     screen.fill(BACKGROUND)
     screen.blit(background, (10, 10))
@@ -103,7 +105,9 @@ def island_screen():
     load_tasks_sprites()
     island_sprites.draw(screen)
     control_sprite.draw(screen)
-
+    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 25)
+    money = font.render(str(experience), True, (255, 255, 255))
+    screen.blit(money, (1330, 120))
 
 class IslandImage(pygame.sprite.Sprite):
     def __init__(self, task_id, coordinates):
@@ -179,31 +183,36 @@ class Island:
         """ответ от системы(верный/неверный ответ)"""
         global experience
         global backgrnd
-        print(number)
+        global task_made
         font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
         self.won = self.task.check_answer(self.input_answer)
-        if self.won and not task_made:  # task_made - проверка на выполненность задания, чтобы не получать бесконечное количество награды
+        if self.won and not task_made:  # task_made - проверка на выполненность задания,
+            # чтобы не получать бесконечное количество награды
             # должен переключаться до нажатия энтер
+            screen.blit(backgrnd, (0, 0))
             experience += 10
             final = 'Всё верно! Получи 10 xp :)'
             result = font.render(final, True, (255, 255, 255))
-            backgrnd.blit(result, (10, 10))
-            screen.blit(backgrnd, (0, 0))
+            screen.blit(result, (10, 10))
+            task_made = True
         elif not self.won and not task_made:
+            if experience >= 10:
+                experience -= 10
+            screen.blit(backgrnd, (0, 0))
             final = 'К сожалению, неверно. Попробуй ещё разок! Ты теряешь 10 xp ;('
             result = font.render(final, True, (255, 255, 255))
-            backgrnd.blit(result, (10, 10))
-            screen.blit(backgrnd, (0, 0))
+            screen.blit(result, (10, 10))
+            task_made = True
         elif self.won and task_made:
-            final = 'Всё верно! Получи 10 xp :)'
-            result = font.render(final, True, (255, 255, 255))
-            backgrnd.blit(result, (10, 10))
             screen.blit(backgrnd, (0, 0))
+            final = 'Всё верно!'
+            result = font.render(final, True, (255, 255, 255))
+            screen.blit(result, (10, 10))
         elif not self.won and task_made:
-            final = 'К сожалению, неверно. Попробуй ещё разок! Ты теряешь 10 xp ;('
-            result = font.render(final, True, (255, 255, 255))
-            backgrnd.blit(result, (10, 10))
             screen.blit(backgrnd, (0, 0))
+            final = 'К сожалению, неверно. Попробуй ещё разок!'
+            result = font.render(final, True, (255, 255, 255))
+            screen.blit(result, (10, 10))
 
     def get_event(self, *args):
         global task_made
@@ -340,15 +349,19 @@ while running:
             if event.key == pygame.K_BACKSPACE:
                 input_text = input_text[:-1]
                 font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                from_player = font.render(input_text, True, (0, 0, 0))
-                # вывод на экран ввод человека
+                from_player = font.render(input_text, True, (0, 100, 0))
+                pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
+                                                               from_player.get_height()))
+                screen.blit(from_player, (100, 860))
             elif event.key == pygame.K_RETURN:
-                task_made = True
                 print(input_text)
-                island.set_answer(input_text)  # использовали clear
+                island.set_answer(input_text)
                 input_text = ''
             else:
                 input_text += event.unicode
+                font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                from_player = font.render(input_text, True, (0, 100, 0))
+                screen.blit(from_player, (100, 860))
     pygame.display.flip()
 
     clock.tick(FPS)
