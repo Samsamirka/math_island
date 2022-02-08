@@ -73,18 +73,18 @@ def start(clock: pygame.time.Clock):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     input_text = input_text[:-1]
-                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                    from_player = font.render(input_text, True, (0, 100, 0))
-                    pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
+                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
+                    from_player = font.render(input_text, True, (0, 0, 0))
+                    pygame.draw.rect(screen, (255, 255, 255), (800, 310, from_player.get_width() + 45,
                                                                from_player.get_height()))
-                    screen.blit(from_player, (100, 860))
+                    screen.blit(from_player, (800, 310))
                 elif event.key == pygame.K_RETURN:
-                    pass
+                    New_game().r_text(input_text)
                 else:
                     input_text += event.unicode
-                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                    from_player = font.render(input_text, True, (0, 100, 0))
-                    screen.blit(from_player, (100, 860))
+                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
+                    from_player = font.render(input_text, True, (0, 0, 0))
+                    screen.blit(from_player, (800, 310))
 
             pygame.display.flip()
             if event.type == pygame.QUIT:
