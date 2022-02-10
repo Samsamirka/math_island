@@ -25,10 +25,11 @@ class ContinuedGame(pygame.sprite.Sprite):
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
             con = sqlite3.connect("data/users.db")
             cur = con.cursor()
-            users_id = cur.execute("SELECT * FROM users MAX(id)")
-            result = cur.execute("""SELECT *
+            result = cur.execute("""SELECT name, money, lvl
                                     FROM users
-                                    WHERE id = ?""", users_id)
+                                    ORDER BY id DESC
+                                    LIMIT 1""").fetchone()
+            # print(result)
             con.close()
 
 
@@ -47,7 +48,7 @@ class NewGame(pygame.sprite.Sprite):
             delt = """DELETE FROM users"""
             new_profil = cur.execute("""INSERT INTO users(names) VALUES(?) RETURNING id""", (input_text,)).fetchone()[0]
             con.commit()
-            print(new_profil)
+            # print(new_profil)
             con.close()
 
 
