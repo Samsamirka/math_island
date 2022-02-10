@@ -74,11 +74,12 @@ def start(clock: pygame.time.Clock):
                 elif event.key == pygame.K_RETURN:
                     play.update()
                 else:
-                    input_text += event.unicode
-                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
-                    from_player = font.render(input_text, True, (0, 0, 0))
-                    screen.blit(from_player, (750, 575))
-            pygame.display.flip()
+                    if len(input_text) <= 10:
+                        input_text += event.unicode
+                        font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
+                        from_player = font.render(input_text, True, (0, 0, 0))
+                        screen.blit(from_player, (750, 575))
+                pygame.display.flip()
             if event.type == pygame.QUIT:
                 running = False
             all_sprites.update(event)
