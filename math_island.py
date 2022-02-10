@@ -9,7 +9,8 @@ SIZE = WIDTH, HEIGHT = 1500, 937
 BACKGROUND = pygame.color.Color('lightskyblue')
 input_text = ''
 number = 0
-experience = 0
+money = 0
+level = 0
 tasks = []
 next = []
 task_made = False
@@ -21,6 +22,7 @@ clock = pygame.time.Clock()
 island_sprites = pygame.sprite.Group()
 control_sprite = pygame.sprite.Group()
 next_sprite = pygame.sprite.Group()
+leave_sprite = pygame.sprite.Group()
 
 
 def render_text_task(text, number=None):  # number - номер аздания для его печати в диалоговом окне
@@ -94,20 +96,33 @@ PLAYER_IMAGES = {
 
 
 def island_screen():
-    global experience
+    global money
+    global level
+    con = sqlite3.connect("data/users.db")
+    cur = con.cursor()
     background = pygame.transform.scale(load_image('Остров.png'), (WIDTH, HEIGHT))
     screen.fill(BACKGROUND)
     screen.blit(background, (10, 10))
+    nick_name = cur.execute("""SELECT name FROM users""").fetchone()[0]
+    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 25)
+    nickname = font.render(str(nick_name), True, (50, 50, 50))
+    screen.blit(nickname, (10, 120))
     island_title = pygame.transform.scale(PLAYER_IMAGES['title_island'], (300, 107))
     screen.blit(island_title, (0, 0))
     money_bag = pygame.transform.scale(PLAYER_IMAGES['money'], (60, 79))
     screen.blit(money_bag, (1260, 81))
-    load_tasks_sprites()
+    lvl = pygame.transform.scale(load_image('LVL.png'), (60, 30))
+    screen.blit(lvl, (1240, 21))
+    load_island_sprites()
     island_sprites.draw(screen)
     control_sprite.draw(screen)
+    leave_sprite.draw(screen)
     font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 25)
-    money = font.render(str(experience), True, (255, 255, 255))
-    screen.blit(money, (1330, 120))
+    money_player = font.render(str(money), True, (255, 255, 255))
+    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+    experience_player = font.render(str(level), True, (255, 255, 255))
+    screen.blit(money_player, (1330, 120))
+    screen.blit(experience_player, (1330, 15))
 
 class IslandImage(pygame.sprite.Sprite):
     def __init__(self, task_id, coordinates):
@@ -131,26 +146,22 @@ ISLAND_COORDINATES = {
 }
 
 
-def load_tasks_sprites():
+def load_island_sprites():
     for task_id, coordinates in ISLAND_COORDINATES.items():
         IslandImage(task_id, coordinates)
+    leave_button = pygame.sprite.Sprite()
+    leave_button.image = pygame.transform.scale(load_image('Кнопка выхода.png'), (210, 53))
+    leave_button.rect = leave_button.image.get_rect()
+    leave_button.rect.x = 1280
+    leave_button.rect.y = 874
+    leave_sprite.add(leave_button)
+
 
 
 NAMES_BOYS = ['Саша', 'Максим', 'Кирилл', 'Андрей', 'Ваня', 'Петя', 'Коля', 'Боря', 'Серёжа']
 NAMES_GIRLS = ['Лиза', 'Оля', 'Самира', 'Катя', 'Маша', 'Юля', 'Аня', 'Лера', 'Вика', 'Настя']
 NAMES_BOYS_EDIT = ['Саши', 'Максима', 'Кирилла', 'Андрея', 'Вани', 'Пети', 'Коли', 'Бори', 'Серёжи']
 NAMES_GIRLS_EDIT = ['Лизы', 'Оли', 'Самиры', 'Кати', 'Маши', 'Юли', 'Ани', 'Леры', 'Вики', 'Насти']
-
-
-class StartWindow:
-    def __init__(self):
-        pass
-
-    def start_open(self):
-        pass
-
-    def settings_open(self):
-        pass
 
 
 class Island:
@@ -185,7 +196,8 @@ class Island:
 
     def get_result(self):
         """ответ от системы(верный/неверный ответ)"""
-        global experience
+        global money
+        global level
         global backgrnd
         global task_made
         font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
@@ -194,16 +206,17 @@ class Island:
             # чтобы не получать бесконечное количество награды
             # должен переключаться до нажатия энтер
             screen.blit(backgrnd, (0, 0))
-            experience += 10
-            final = 'Всё верно! Получи 10 xp :)'
+            money += 10
+            level += 1
+            final = 'Всё верно! Получи 10 монет :)'
             result = font.render(final, True, (255, 255, 255))
             screen.blit(result, (10, 10))
             task_made = True
         elif not self.won and not task_made:
-            if experience >= 10:
-                experience -= 10
+            if money >= 10:
+                money -= 10
             screen.blit(backgrnd, (0, 0))
-            final = 'К сожалению, неверно. Попробуй ещё разок! Ты теряешь 10 xp ;('
+            final = 'К сожалению, неверно. Попробуй ещё разок! Ты теряешь 10 монет ;('
             result = font.render(final, True, (255, 255, 255))
             screen.blit(result, (10, 10))
             task_made = True
@@ -220,6 +233,8 @@ class Island:
 
     def get_event(self, *args):
         global task_made
+        global money
+        global level
         for button in tasks:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
                 self.task = Task(button.task_id)  # task_id должен быть записан при создании спрайта
@@ -243,6 +258,13 @@ class Island:
                     S = random.randint(600, 1301)
                 num = random.randint(15, 31)
                 generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num, id=6)
+        for leave_btn in leave_sprite:
+            if args and args[0].type == pygame.MOUSEBUTTONDOWN and leave_btn.rect.collidepoint(args[0].pos):
+                con = sqlite3.connect("data/users.db")
+                cur = con.cursor()
+                cur.execute("""INSERT INTO users(money, lvl) VALUES(?, ?)""", (money, level,))
+                con.commit()
+                con.close()
 
 
 def generate_task_1(text):
@@ -282,7 +304,7 @@ def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
 def generate_task(id, **args):
     global answer
     global number
-    con = sqlite3.connect('text_of_task_and_exercises.db')
+    con = sqlite3.connect('data/text_of_task_and_exercises.db')
     cur = con.cursor()
     text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", (id,)).fetchone())
 
@@ -358,8 +380,10 @@ while running:
                                                                from_player.get_height()))
                 screen.blit(from_player, (100, 860))
             elif event.key == pygame.K_RETURN:
-                print(input_text)
-                island.set_answer(input_text)
+                if input_text == '':
+                    island.set_answer(0)
+                else:
+                    island.set_answer(input_text)
                 input_text = ''
             else:
                 input_text += event.unicode
