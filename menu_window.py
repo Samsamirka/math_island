@@ -43,7 +43,7 @@ class StartButtons(pygame.sprite.Sprite):
 
     def update(self, clock, *args):
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
-            game = start_game.start(clock)
+            game = start_game.start(clock, window_surface)
 
 
 class SettingsButtons(pygame.sprite.Sprite):
@@ -56,7 +56,7 @@ class SettingsButtons(pygame.sprite.Sprite):
     def update(self, clock, *args):
         global music_playing
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
-            music_playing = settings_window.open_settings(clock, music_playing)
+            music_playing = settings_window.open_settings(music_playing, window_surface)
 
 
 down_cloud = pygame.image.load('data/down_cloud.png')

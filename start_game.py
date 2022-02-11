@@ -1,12 +1,7 @@
 import pygame
 import sqlite3
 
-HEIGHT, WIDTH = 1500, 937
-COLOR_ACTIVE = pygame.Color('white')
-COLOR_INACTIVE = pygame.Color((30, 30, 30))
-
 input_text = ''
-window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
 # screen = pygame.Surface((HEIGHT, WIDTH))
 # screen.fill(pygame.Color('black'))
 
@@ -57,7 +52,7 @@ cont = ContinuedGame()
 play = NewGame()
 
 
-def start(clock: pygame.time.Clock):
+def start(clock: pygame.time.Clock, window_surface):
     global input_text
     running = True
     while running:

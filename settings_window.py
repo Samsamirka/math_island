@@ -1,12 +1,10 @@
 import pygame
 
-HEIGHT, WIDTH = 1500, 937
 
-window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
 # screen = pygame.Surface((HEIGHT, WIDTH))
 # screen.fill(pygame.Color('black'))
 screen = pygame.image.load('data/background.png')
-screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_height()//1.6))
+# screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_height()//1.6))
 
 to_return = False
 
@@ -42,7 +40,7 @@ mus_txt = pygame.transform.scale(mus_txt, (mus_txt.get_width() // 2, mus_txt.get
 all_sprites = pygame.sprite.Group()
 
 
-class Push_buttons(pygame.sprite.Sprite):
+class PushButtons(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(all_sprites)
         self.image = pygame.image.load('data/btn_off.png')
@@ -60,7 +58,7 @@ class Push_buttons(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
 
 
-class Back_buttons(pygame.sprite.Sprite):
+class BackButtons(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(all_sprites)
         self.image = pygame.image.load('data/back_btn.png')
@@ -73,11 +71,11 @@ class Back_buttons(pygame.sprite.Sprite):
             to_return = True
 
 
-back = Back_buttons()
-music = Push_buttons()
+back = BackButtons()
+music = PushButtons()
 
 
-def open_settings(clock: pygame.time.Clock, prev_music_playing):
+def open_settings(prev_music_playing, window_surface):
     global music_playing
     music_playing = prev_music_playing
     running = True
