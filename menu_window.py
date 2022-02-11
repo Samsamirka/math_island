@@ -9,7 +9,7 @@ HEIGHT, WIDTH = 1500, 937
 
 window_surface = pygame.display.set_mode((HEIGHT, WIDTH))
 screen = pygame.image.load('data/background.png')
-screen = pygame.transform.scale(screen, (screen.get_width()//1.6, screen.get_height()//1.6))
+screen = pygame.transform.scale(screen, (screen.get_width() // 1.6, screen.get_height() // 1.6))
 
 
 pygame.mixer.music.load('data/music.mp3')
@@ -56,19 +56,19 @@ class SettingsButtons(pygame.sprite.Sprite):
 
 
 down_cloud = pygame.image.load('data/down_cloud.png')
-down_cloud = pygame.transform.scale(down_cloud, (down_cloud.get_width()//1.5, down_cloud.get_height()//1.5))
+down_cloud = pygame.transform.scale(down_cloud, (down_cloud.get_width() // 1.5, down_cloud.get_height() // 1.5))
 right_cloud = pygame.image.load('data/right_cloud.png')
-right_cloud = pygame.transform.scale(right_cloud, (right_cloud.get_width()//1.5, right_cloud.get_height()//1.5))
+right_cloud = pygame.transform.scale(right_cloud, (right_cloud.get_width() // 1.5, right_cloud.get_height() // 1.5))
 left_cloud = pygame.image.load('data/left_cloud.png')
-left_cloud = pygame.transform.scale(left_cloud, (left_cloud.get_width()//1.5, left_cloud.get_height()//1.5))
+left_cloud = pygame.transform.scale(left_cloud, (left_cloud.get_width() // 1.5, left_cloud.get_height() // 1.5))
 
 sun = pygame.image.load('data/sun.png')
-sun = pygame.transform.scale(sun, (sun.get_width()//2, sun.get_height()//2))
+sun = pygame.transform.scale(sun, (sun.get_width() // 2, sun.get_height() // 2))
 sunlight = pygame.image.load('data/sunlights.png')
-sunlight = pygame.transform.scale(sunlight, (sunlight.get_width()//2, sunlight.get_height()//2))
+sunlight = pygame.transform.scale(sunlight, (sunlight.get_width() // 2, sunlight.get_height() // 2))
 
 text = pygame.image.load('data/mthislnd_text.png')
-text = pygame.transform.scale(text, (text.get_width()//2, text.get_height()//2))
+text = pygame.transform.scale(text, (text.get_width() // 2, text.get_height() // 2))
 
 start_btn = StartButtons()
 settings_btn = SettingsButtons()
@@ -83,8 +83,8 @@ def menu_w(clock: pygame.time.Clock):
             all_btns.update(clock, event)
         window_surface.blit(screen, (0, 0))
 
-        screen.blit(start_btn.image, start_btn.rect)
-        screen.blit(settings_btn.image, settings_btn.rect)
+        window_surface.blit(start_btn.image, start_btn.rect)
+        window_surface.blit(settings_btn.image, settings_btn.rect)
 
         window_surface.blit(sun, (450, 130))
         window_surface.blit(sunlight, (390, 80))

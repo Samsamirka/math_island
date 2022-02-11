@@ -96,11 +96,13 @@ PLAYER_IMAGES = {
     'money': load_image('Мешок денег.png'),
     'title_island': load_image('Название острова.png')
 }
+running_island = False
 
 
 def island_screen(screen):
     global money
     global level
+    global running_island
     running_island = True
     con = sqlite3.connect("data/users.db")
     cur = con.cursor()
