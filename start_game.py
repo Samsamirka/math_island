@@ -29,7 +29,7 @@ class ContinuedGame(pygame.sprite.Sprite):
                                     FROM users
                                     ORDER BY id DESC
                                     LIMIT 1""").fetchone()
-            # print(result)
+            print(result)
             con.close()
 
 
@@ -46,9 +46,9 @@ class NewGame(pygame.sprite.Sprite):
             con = sqlite3.connect("data/users.db")
             cur = con.cursor()
             delt = """DELETE FROM users"""
-            new_profil = cur.execute("""INSERT INTO users(names) VALUES(?) RETURNING id""", (input_text,)).fetchone()[0]
+            new_profil = cur.execute("""INSERT INTO users(name) VALUES(?) RETURNING id""", (input_text,)).fetchone()[0]
             con.commit()
-            # print(new_profil)
+            print(new_profil)
             con.close()
 
 
