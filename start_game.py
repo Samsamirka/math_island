@@ -24,10 +24,10 @@ class ContinuedGame(pygame.sprite.Sprite):
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
             con = sqlite3.connect("data/users.db")
             cur = con.cursor()
-            result = cur.execute("""SELECT name, money, lvl
-                                    FROM users
-                                    ORDER BY id DESC
-                                    LIMIT 1""").fetchone()
+            cur.execute("""SELECT name, money, lvl
+                           FROM users
+                           ORDER BY id DESC
+                           LIMIT 1""").fetchone()
             con.close()
             island_screen(screen)
 

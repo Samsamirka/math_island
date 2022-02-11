@@ -30,7 +30,7 @@ class Clouds(pygame.sprite.Group):
         self.rect2 = self.image.get_rect(center=(700, 500))
 
 
-class Start_buttons(pygame.sprite.Sprite):
+class StartButtons(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(all_btns)
         self.image = pygame.image.load('data/start_btn.png')
@@ -42,7 +42,7 @@ class Start_buttons(pygame.sprite.Sprite):
             start_game.start(clock)
 
 
-class Settings_buttons(pygame.sprite.Sprite):
+class SettingsButtons(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(all_btns)
         self.image = pygame.image.load('data/settings_btn.png')
@@ -70,8 +70,8 @@ sunlight = pygame.transform.scale(sunlight, (sunlight.get_width()//2, sunlight.g
 text = pygame.image.load('data/mthislnd_text.png')
 text = pygame.transform.scale(text, (text.get_width()//2, text.get_height()//2))
 
-start_btn = Start_buttons()
-settings_btn = Settings_buttons()
+start_btn = StartButtons()
+settings_btn = SettingsButtons()
 
 
 def menu_w(clock: pygame.time.Clock):

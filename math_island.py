@@ -375,6 +375,7 @@ while running_island:
     for event in pygame.event.get():
         island.get_event(event)
         if event.type == pygame.QUIT:
+            running_island = False
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_BACKSPACE:
