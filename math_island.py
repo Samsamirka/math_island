@@ -4,6 +4,7 @@ import os
 import random
 import sqlite3
 
+
 FPS = 50
 SIZE = WIDTH, HEIGHT = 1500, 937
 BACKGROUND = pygame.color.Color('lightskyblue')
@@ -14,6 +15,8 @@ level = 0
 tasks = []
 next = []
 task_made = False
+running_island = False
+nick_name = ''
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
@@ -95,9 +98,10 @@ PLAYER_IMAGES = {
 }
 
 
-def island_screen():
+def island_screen(screen):
     global money
     global level
+    running_island = True
     con = sqlite3.connect("data/users.db")
     cur = con.cursor()
     background = pygame.transform.scale(load_image('Остров.png'), (WIDTH, HEIGHT))
@@ -123,6 +127,7 @@ def island_screen():
     experience_player = font.render(str(level), True, (255, 255, 255))
     screen.blit(money_player, (1330, 120))
     screen.blit(experience_player, (1330, 15))
+    con.close()
 
 class IslandImage(pygame.sprite.Sprite):
     def __init__(self, task_id, coordinates):
@@ -262,7 +267,9 @@ class Island:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and leave_btn.rect.collidepoint(args[0].pos):
                 con = sqlite3.connect("data/users.db")
                 cur = con.cursor()
-                cur.execute("""INSERT INTO users(money, lvl) VALUES(?, ?)""", (money, level,))
+                global nick_name
+                cur.execute("""INSERT INTO users(money, lvl) VALUES(?, ?) WHERE id, name = 1, ?""", (money, level,
+                                                                                                     nick_name,))
                 con.commit()
                 con.close()
 
@@ -362,11 +369,9 @@ def terminate():
     sys.exit()
 
 backgrnd = pygame.transform.scale(load_image('фон_для_задания.jpeg'), (1500, 937))
-island_screen()
-running = True
 island = Island()
 
-while running:
+while running_island:
     for event in pygame.event.get():
         island.get_event(event)
         if event.type == pygame.QUIT:
@@ -377,7 +382,7 @@ while running:
                 font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
                 from_player = font.render(input_text, True, (0, 100, 0))
                 pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
-                                                               from_player.get_height()))
+                                                           from_player.get_height()))
                 screen.blit(from_player, (100, 860))
             elif event.key == pygame.K_RETURN:
                 if input_text == '':
