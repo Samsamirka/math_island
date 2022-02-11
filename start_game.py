@@ -38,7 +38,7 @@ class NewGame(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = pygame.image.load('data/new_game.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
-        self.rect = self.image.get_rect(center=(500, 600))
+        self.rect = self.image.get_rect(center=(900, 600))
 
     def update(self, *args):
         global input_text
@@ -69,9 +69,9 @@ def start(clock: pygame.time.Clock):
                     input_text = input_text[:-1]
                     font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
                     from_player = font.render(input_text, True, (0, 0, 0))
-                    pygame.draw.rect(screen, (255, 255, 255), (750, 575, from_player.get_width() + 45,
+                    pygame.draw.rect(screen, (255, 255, 255), (400, 560, from_player.get_width() + 45,
                                                                from_player.get_height()))
-                    screen.blit(from_player, (750, 575))
+                    screen.blit(from_player, (400, 560))
                 elif event.key == pygame.K_RETURN:
                     play.update()
                 else:
@@ -79,7 +79,7 @@ def start(clock: pygame.time.Clock):
                         input_text += event.unicode
                         font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
                         from_player = font.render(input_text, True, (0, 0, 0))
-                        screen.blit(from_player, (750, 575))
+                        screen.blit(from_player, (400, 560))
                 pygame.display.flip()
             if event.type == pygame.QUIT:
                 running = False
