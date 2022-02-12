@@ -43,19 +43,20 @@ all_sprites = pygame.sprite.Group()
 class PushButtons(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(all_sprites)
-        self.image = pygame.image.load('data/btn_off.png')
+        self.image = pygame.image.load('data/btn_on.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
         self.rect = self.image.get_rect(center=(940, 325))
 
-    def update(self, *args):
+    '''def update(self, *args):
         global music_playing
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
             music_playing = not music_playing
             if music_playing:
-                self.image = pygame.image.load('data/btn_on.png')
-            else:
                 self.image = pygame.image.load('data/btn_off.png')
-            self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
+            else:
+                self.image = pygame.image.load('data/btn_on.png')
+            self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, 
+            self.image.get_height() // 2))'''
 
 
 class BackButtons(pygame.sprite.Sprite):
