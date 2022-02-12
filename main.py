@@ -231,13 +231,13 @@ class Island:
         self.open_condition_button.rect.y = 825
         back_to_task_sprite.add(self.open_condition_button)
 
-    def open_condition(self):
-        global running_condition, task_start, for_condition
-        while running_condition:
+    def open_condition(self, running_condition):
+        global task_start, for_condition
+        if running_condition:
             task_start = False
-            for_condition = pygame.transform.scale(load_image("Город без дождя.jpg"), (1500, 937))
-            for_condition.blit(load_image('подложка_теория.png'), (50, 30))
-        return for_condition
+            for_condition = pygame.transform.scale(load_image("полное_условие.jpeg"), (1500, 937))
+
+            return for_condition
 
     def set_answer(self, answer):
         self.input_answer = answer
@@ -329,7 +329,7 @@ class Island:
         for condition_button in back_to_task_sprite:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and condition_button.rect.collidepoint(args[0].pos):
                 running_condition = True
-                window_surface.blit(self.open_condition())
+                screen.blit(self.open_condition(running_condition), (0, 0))
 
 
 def generate_task_1(text):
