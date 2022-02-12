@@ -16,8 +16,10 @@ money = 0
 level = 0
 tasks = []
 next = []
+task_start = False
 task_made = False
 running_island = False
+running_condition = False
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
@@ -27,6 +29,7 @@ island_sprites = pygame.sprite.Group()
 control_sprite = pygame.sprite.Group()
 next_sprite = pygame.sprite.Group()
 leave_sprite = pygame.sprite.Group()
+back_to_task_sprite = pygame.sprite.Group()
 
 
 def render_text_task(text, number=None):  # number - номер аздания для его печати в диалоговом окне
@@ -66,6 +69,8 @@ def render_text_task(text, number=None):  # number - номер аздания �
             backgrnd.blit(text_task, (100, 650 + y))
     next_sprite.draw(backgrnd)
     next_sprite.clear(screen, screen)
+    back_to_task_sprite.draw(backgrnd)
+    back_to_task_sprite.clear(screen, screen)
     return backgrnd
 
 
@@ -130,31 +135,33 @@ def island_screen():
     screen.blit(money_player, (1330, 120))
     screen.blit(experience_player, (1330, 15))
     con.close()
-    global input_text
+    global input_text, task_start
     while running_island:
         for event in pygame.event.get():
             island.get_event(event)
             if event.type == pygame.QUIT:
                 running_island = running = running_start = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE:
-                    input_text = input_text[:-1]
-                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                    from_player = font.render(input_text, True, (0, 100, 0))
-                    pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
-                                                               from_player.get_height()))
-                    screen.blit(from_player, (100, 860))
-                elif event.key == pygame.K_RETURN:
-                    if input_text == '':
-                        island.set_answer(0)
+                if task_start:
+                    if event.key == pygame.K_BACKSPACE:
+                        input_text = input_text[:-1]
+                        font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                        from_player = font.render(input_text, True, (0, 100, 0))
+                        pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
+                                                                   from_player.get_height()))
+                        screen.blit(from_player, (100, 860))
+                    elif event.key == pygame.K_RETURN:
+                        if input_text == '':
+                            island.set_answer(0)
+                        else:
+                            input_text = float(input_text.replace(',', '.'))
+                            island.set_answer(input_text)
+                        input_text = ''
                     else:
-                        island.set_answer(input_text)
-                    input_text = ''
-                else:
-                    input_text += event.unicode
-                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                    from_player = font.render(input_text, True, (0, 100, 0))
-                    screen.blit(from_player, (100, 860))
+                        input_text += event.unicode
+                        font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                        from_player = font.render(input_text, True, (0, 100, 0))
+                        screen.blit(from_player, (100, 860))
             window_surface.blit(screen, (0, 0))
         pygame.display.flip()
 
@@ -203,7 +210,7 @@ NAMES_GIRLS_EDIT = ['Лизы', 'Оли', 'Самиры', 'Кати', 'Маши'
 class Island:
     def __init__(self):
         global next
-        global next_sprite
+        global next_sprite, back_to_task_sprite
         self.input_answer = input_text
         self.task = None
         self.number = 0
@@ -216,6 +223,21 @@ class Island:
         self.next_button.rect.y = 830
         next_sprite.add(self.next_button)
         next = [self.next_button]
+        font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 70)
+        self.open_condition_button = pygame.sprite.Sprite()
+        self.open_condition_button.image = font.render('+', True, 'royalblue')
+        self.open_condition_button.rect = self.open_condition_button.image.get_rect()
+        self.open_condition_button.rect.x = 1150
+        self.open_condition_button.rect.y = 825
+        back_to_task_sprite.add(self.open_condition_button)
+
+    def open_condition(self):
+        global running_condition, task_start, for_condition
+        while running_condition:
+            task_start = False
+            for_condition = pygame.transform.scale(load_image("Город без дождя.jpg"), (1500, 937))
+            for_condition.blit(load_image('подложка_теория.png'), (50, 30))
+        return for_condition
 
     def set_answer(self, answer):
         self.input_answer = answer
@@ -267,32 +289,34 @@ class Island:
             screen.blit(result, (10, 10))
 
     def get_event(self, *args):
-        global task_made, running_island, running, running_start
-        global money, level, input_text, nick_name
+        global task_made, running_island, running, running_start, task_start, back_to_task_sprite
+        global money, level, input_text, nick_name, running_condition
         for button in tasks:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
+                task_start = True
                 self.task = Task(button.task_id)  # task_id должен быть записан при создании спрайта
         for arrow in next:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
+                task_start = False
                 task_made = False
                 input_text = ''
                 island_screen()
-        for btn in control_sprite:
-            if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
-                ends = random.randint(25, 33)  # расстояние между спицами
-                h = random.randint(24, 38)  # высота купола
-                d = random.randint(90, 120)  # расстояние между концами спиц
-                h_2 = round(random.uniform(50, 70), 1)
-                r = random.randint(25, 40)
-                a = random.randint(30, 51)  # длина
-                b = random.randint(70, 151)  # ширина
-                S = random.randint(600, 1301)
-                while a % 10 != 0 or b % 10 != 0 or S % 50 != 0:
-                    a = random.randint(30, 51)  # длина
-                    b = random.randint(70, 151)  # ширина
-                    S = random.randint(600, 1301)
-                num = random.randint(15, 31)
-                generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num, id=6)
+        # for btn in control_sprite:
+            # if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
+                # ends = random.randint(25, 33)  # расстояние между спицами
+                # h = random.randint(24, 38)  # высота купола
+                # d = random.randint(90, 120)  # расстояние между концами спиц
+                # h_2 = round(random.uniform(50, 70), 1)
+                # r = random.randint(25, 40)
+                # a = random.randint(30, 51)  # длина
+                # b = random.randint(70, 151)  # ширина
+                # S = random.randint(600, 1301)
+                # while a % 10 != 0 or b % 10 != 0 or S % 50 != 0:
+                    # a = random.randint(30, 51)  # длина
+                    # b = random.randint(70, 151)  # ширина
+                    # S = random.randint(600, 1301)
+                # num = random.randint(15, 31)
+                # generate_task(ends=ends, h=h, d=d, h_2=h_2, r=r, a=a, b=b, S=S, num=num, id=6)
         for leave_btn in leave_sprite:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and leave_btn.rect.collidepoint(args[0].pos):
                 con = sqlite3.connect("data/users.db")
@@ -302,6 +326,10 @@ class Island:
                 con.commit()
                 con.close()
                 running_island = running = running_start = False
+        for condition_button in back_to_task_sprite:
+            if args and args[0].type == pygame.MOUSEBUTTONDOWN and condition_button.rect.collidepoint(args[0].pos):
+                running_condition = True
+                window_surface.blit(self.open_condition())
 
 
 def generate_task_1(text):
@@ -344,6 +372,7 @@ def generate_task(id, **args):
     con = sqlite3.connect('data/text_of_task_and_exercises.db')
     cur = con.cursor()
     text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", (id,)).fetchone())
+    all_condition = str(cur.execute("SELECT text FROM task_exercises WHERE id = 6").fetchone())
 
     if 'ends' not in args:
         args['ends'] = random.randint(25, 33)  # расстояние между спицами
@@ -371,8 +400,10 @@ def generate_task(id, **args):
     boy_edit = NAMES_BOYS_EDIT[NAMES_BOYS.index(boy)]
     girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
 
+    all_condition = all_condition.format(girl=girl, boy=boy, d=args['d'], h=args['h'], ends=args['ends'])
+
     if id == 1:
-        text, answer = generate_task_1(text)  # и так нужно написать еще 4 функции
+        text, answer = generate_task_1(text)
     elif id == 2:
         text, answer = generate_task_2(text, args['ends'], boy)
     elif id == 3:
@@ -433,7 +464,7 @@ class NewGame(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = pygame.image.load('data/new_game.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
-        self.rect = self.image.get_rect(center=(500, 600))
+        self.rect = self.image.get_rect(center=(550, 600))
 
     def update(self, *args):
         global input_text, running_start
@@ -454,14 +485,13 @@ running_start = False
 
 
 def start(clock: pygame.time.Clock, screen):
-    global input_text, running_start, running
+    global input_text, running_start
     running_start = True
     pygame.draw.rect(screen, (255, 255, 255), (750, 575, 288, 52))
     while running_start:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running_start = False
-                running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     input_text = input_text[:-1]
