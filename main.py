@@ -18,7 +18,6 @@ tasks = []
 next = []
 task_made = False
 running_island = False
-nick_name = ''
 
 pygame.init()
 screen = pygame.display.set_mode(SIZE)
@@ -101,17 +100,16 @@ PLAYER_IMAGES = {
 running_island = False
 
 
-def island_screen(screen):
-    global money
-    global level
-    global running_island
+def island_screen():
+    global running_island, running, running_start
+    global window_surface, screen
     running_island = True
     con = sqlite3.connect("data/users.db")
     cur = con.cursor()
     background = pygame.transform.scale(load_image('Остров.png'), (WIDTH, HEIGHT))
     screen.fill(BACKGROUND)
     screen.blit(background, (10, 10))
-    nick_name = cur.execute("""SELECT name FROM users""").fetchone()[0]
+    nick_name = cur.execute("""SELECT name FROM users ORDER BY id DESC LIMIT 1""").fetchone()[0]
     font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 25)
     nickname = font.render(str(nick_name), True, (50, 50, 50))
     screen.blit(nickname, (10, 120))
@@ -132,6 +130,35 @@ def island_screen(screen):
     screen.blit(money_player, (1330, 120))
     screen.blit(experience_player, (1330, 15))
     con.close()
+    global input_text
+    while running_island:
+        for event in pygame.event.get():
+            island.get_event(event)
+            if event.type == pygame.QUIT:
+                running_island = running = running_start = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    input_text = input_text[:-1]
+                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                    from_player = font.render(input_text, True, (0, 100, 0))
+                    pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
+                                                               from_player.get_height()))
+                    screen.blit(from_player, (100, 860))
+                elif event.key == pygame.K_RETURN:
+                    if input_text == '':
+                        island.set_answer(0)
+                    else:
+                        island.set_answer(input_text)
+                    input_text = ''
+                else:
+                    input_text += event.unicode
+                    font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                    from_player = font.render(input_text, True, (0, 100, 0))
+                    screen.blit(from_player, (100, 860))
+            window_surface.blit(screen, (0, 0))
+        pygame.display.flip()
+
+        clock.tick(FPS)
 
 class IslandImage(pygame.sprite.Sprite):
     def __init__(self, task_id, coordinates):
@@ -205,8 +232,7 @@ class Island:
 
     def get_result(self):
         """ответ от системы(верный/неверный ответ)"""
-        global money
-        global level
+        global money, level
         global backgrnd
         global task_made
         font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
@@ -241,15 +267,15 @@ class Island:
             screen.blit(result, (10, 10))
 
     def get_event(self, *args):
-        global task_made
-        global money
-        global level
+        global task_made, running_island, running, running_start
+        global money, level, input_text, nick_name
         for button in tasks:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
                 self.task = Task(button.task_id)  # task_id должен быть записан при создании спрайта
         for arrow in next:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
                 task_made = False
+                input_text = ''
                 island_screen()
         for btn in control_sprite:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and btn.rect.collidepoint(args[0].pos):
@@ -271,11 +297,11 @@ class Island:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and leave_btn.rect.collidepoint(args[0].pos):
                 con = sqlite3.connect("data/users.db")
                 cur = con.cursor()
-                global nick_name
-                cur.execute("""INSERT INTO users(money, lvl) VALUES(?, ?) WHERE id, name = 1, ?""", (money, level,
-                                                                                                     nick_name,))
+                nick_name = cur.execute("""SELECT name FROM users ORDER BY id DESC LIMIT 1""").fetchone()[0]
+                cur.execute("""INSERT INTO users(money, lvl, name) VALUES(?, ?, ?)""", (money, level, nick_name,))
                 con.commit()
                 con.close()
+                running_island = running = running_start = False
 
 
 def generate_task_1(text):
@@ -371,35 +397,6 @@ class Task:
 backgrnd = pygame.transform.scale(load_image('фон_для_задания.jpeg'), (1500, 937))
 island = Island()
 
-while running_island:
-    for event in pygame.event.get():
-        island.get_event(event)
-        if event.type == pygame.QUIT:
-            running_island = False
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_BACKSPACE:
-                input_text = input_text[:-1]
-                font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                from_player = font.render(input_text, True, (0, 100, 0))
-                pygame.draw.rect(screen, (255, 255, 255), (100, 860, from_player.get_width() + 35,
-                                                           from_player.get_height()))
-                screen.blit(from_player, (100, 860))
-            elif event.key == pygame.K_RETURN:
-                if input_text == '':
-                    island.set_answer(0)
-                else:
-                    island.set_answer(input_text)
-                input_text = ''
-            else:
-                input_text += event.unicode
-                font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                from_player = font.render(input_text, True, (0, 100, 0))
-                screen.blit(from_player, (100, 860))
-    pygame.display.flip()
-
-    clock.tick(FPS)
-
 
 WIDTH, HEIGHT = 1500, 937
 COLOR_ACTIVE = pygame.Color('white')
@@ -408,7 +405,6 @@ COLOR_INACTIVE = pygame.Color((30, 30, 30))
 input_text = ''
 window_surface = pygame.display.set_mode((WIDTH, HEIGHT))
 
-background_image = pygame.image.load('data/new_fon.png')
 all_sprites = pygame.sprite.Group()
 
 
@@ -420,15 +416,16 @@ class ContinuedGame(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(750, 350))
 
     def update(self, *args):
+        global nick_name, money, level
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
             con = sqlite3.connect("data/users.db")
             cur = con.cursor()
-            cur.execute("""SELECT name, money, lvl
-                           FROM users
-                           ORDER BY id DESC
-                           LIMIT 1""").fetchone()
+            nick_name, money, level = cur.execute("""SELECT name, money, lvl
+                                                        FROM users
+                                                        ORDER BY id DESC
+                                                        LIMIT 1""").fetchone()
             con.close()
-            island_screen(background_image)
+            island_screen()
 
 
 class NewGame(pygame.sprite.Sprite):
@@ -439,48 +436,53 @@ class NewGame(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(500, 600))
 
     def update(self, *args):
-        global input_text
+        global input_text, running_start
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
             con = sqlite3.connect("data/users.db")
             cur = con.cursor()
             cur.execute("""INSERT INTO users(name) VALUES(?)""", (input_text,))
+            input_text = ''
             con.commit()
             con.close()
-            island_screen(background_image)
+            running_start = False
+            island_screen()
 
 
 cont = ContinuedGame()
 play = NewGame()
+running_start = False
 
 
-def start(clock: pygame.time.Clock):
-    global input_text
-    running = True
-    while running:
+def start(clock: pygame.time.Clock, screen):
+    global input_text, running_start, running
+    running_start = True
+    pygame.draw.rect(screen, (255, 255, 255), (750, 575, 288, 52))
+    while running_start:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                running_start = False
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     input_text = input_text[:-1]
                     font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
                     from_player = font.render(input_text, True, (0, 0, 0))
-                    pygame.draw.rect(background_image, (255, 255, 255), (750, 575, from_player.get_width() + 45,
+                    print(from_player.get_width() + 45)
+                    pygame.draw.rect(screen, (255, 255, 255), (750, 575, from_player.get_width() + 45,
                                                                          from_player.get_height()))
-                    background_image.blit(from_player, (750, 575))
-                elif event.key == pygame.K_RETURN:
-                    play.update()
+                    screen.blit(from_player, (750, 575))
                 else:
-                    if len(input_text) <= 10:
+                    if len(input_text) < 10:
                         input_text += event.unicode
                         font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 45)
                         from_player = font.render(input_text, True, (0, 0, 0))
-                        background_image.blit(from_player, (750, 575))
+                        screen.blit(from_player, (750, 575))
                 pygame.display.flip()
             all_sprites.update(event)
-        window_surface.blit(background_image, (0, 0))
-        background_image.blit(cont.image, cont.rect)
-        background_image.blit(play.image, play.rect)
+        window_surface.blit(screen, (0, 0))
+        screen.blit(cont.image, cont.rect)
+        screen.blit(play.image, play.rect)
+        window_surface.blit(screen, (0, 0))
         pygame.display.update()
         clock.tick(30)
 
@@ -562,12 +564,12 @@ running_settings = False
 
 
 def open_settings(clock: pygame.time.Clock):
-    global music_playing, running_settings
+    global music_playing, running_settings, running
     running_settings = True
     while running_settings:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running_settings = False
+                running_settings = running = False
             all_sprites.update(event)
         window_surface.blit(background_image, (0, 0))
 
@@ -614,8 +616,9 @@ class StartButtons(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(700, 500))
 
     def update(self, clock, *args):
+        background_start = pygame.image.load('data/new_fon.png')
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
-            start(clock)
+            start(clock, background_start)
 
 
 class SettingsButtons(pygame.sprite.Sprite):
