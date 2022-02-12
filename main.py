@@ -91,8 +91,8 @@ TASKS_IMAGES = {
     2: load_image('2.png'),
     3: load_image('3.png'),
     4: load_image('4.png'),
-    5: load_image('5.png'),
-    6: load_image('Самостоятельные.png')
+    5: load_image('5.png')
+    # 6: load_image('Самостоятельные.png')
 }
 PLAYER_IMAGES = {
     'money': load_image('Мешок денег.png'),
@@ -150,8 +150,8 @@ ISLAND_COORDINATES = {
     2: (587, 390),
     3: (800, 355),
     4: (851, 580),
-    5: (669, 560),
-    6: (1110, 245)
+    5: (669, 560)
+    # 6: (1110, 245)
 }
 
 
@@ -494,6 +494,7 @@ to_return = False
 
 pygame.mixer.music.load('data/music.mp3')
 music_playing = True
+pygame.mixer.music.play()
 
 
 down_cloud = pygame.image.load('data/down_cloud.png')
@@ -525,7 +526,7 @@ mus_txt = pygame.transform.scale(mus_txt, (mus_txt.get_width() // 2, mus_txt.get
 class PushButtons(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(all_sprites)
-        self.image = pygame.image.load('data/btn_off.png')
+        self.image = pygame.image.load('data/btn_on.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
         self.rect = self.image.get_rect(center=(940, 325))
 
@@ -534,8 +535,10 @@ class PushButtons(pygame.sprite.Sprite):
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
             music_playing = not music_playing
             if music_playing:
+                pygame.mixer.music.play()
                 self.image = pygame.image.load('data/btn_on.png')
             else:
+                pygame.mixer.music.stop()
                 self.image = pygame.image.load('data/btn_off.png')
             self.image = pygame.transform.scale(self.image, (self.image.get_width() // 2, self.image.get_height() // 2))
 
@@ -548,23 +551,23 @@ class BackButtons(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(1450, 50))
 
     def update(self, *args):
-        global to_return
+        global running_settings
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
-            to_return = True
+            running_settings = False
 
 
 back = BackButtons()
 music = PushButtons()
+running_settings = False
 
 
-def open_settings(clock: pygame.time.Clock, prev_music_playing):
-    global music_playing
-    music_playing = prev_music_playing
-    running = True
-    while running:
+def open_settings(clock: pygame.time.Clock):
+    global music_playing, running_settings
+    running_settings = True
+    while running_settings:
         for event in pygame.event.get():
-            if to_return:
-                return music_playing
+            if event.type == pygame.QUIT:
+                running_settings = False
             all_sprites.update(event)
         window_surface.blit(background_image, (0, 0))
 
@@ -582,8 +585,8 @@ def open_settings(clock: pygame.time.Clock, prev_music_playing):
 
         window_surface.blit(mus_txt, (600, 320))
 
-        background_image.blit(music.image, music.rect)
-        background_image.blit(back.image, back.rect)
+        window_surface.blit(music.image, music.rect)
+        window_surface.blit(back.image, back.rect)
 
         pygame.display.update()
     return music_playing
@@ -625,7 +628,7 @@ class SettingsButtons(pygame.sprite.Sprite):
     def update(self, clock, *args):
         global music_playing
         if args and args[0].type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(args[0].pos):
-            music_playing = open_settings(clock, music_playing)
+            open_settings(clock)
 
 
 sun = pygame.image.load('data/sun.png')
