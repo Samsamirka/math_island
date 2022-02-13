@@ -58,7 +58,7 @@ def render_text_task(text, number=None):  # number - номер аздания �
             text_task = font.render(str(string), True, (0, 0, 0))
             backgrnd.blit(text_task, (100, 650 + y))
             y += 35
-            string = ''
+            string = word + " "
         elif text_task.get_size()[0] == 1200:
             backgrnd.blit(text_task, (100, 650 + y))
             y += 35
@@ -283,7 +283,7 @@ class Island:
         global backgrnd
         global task_made
         font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-        self.won = self.task.check_answer(self.input_answer)
+        self.won = self.result.check_answer(self.input_answer)
         if self.won and not task_made:  # task_made - проверка на выполненность задания,
             # чтобы не получать бесконечное количество награды
             # должен переключаться до нажатия энтер
@@ -319,7 +319,7 @@ class Island:
         for button in tasks:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
                 task_start = True
-                Task(button.task_id)  # task_id должен быть записан при создании спрайта
+                self.result = Task(button.task_id)  # task_id должен быть записан при создании спрайта
         for arrow in next:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
                 task_start = False
@@ -358,8 +358,9 @@ class Island:
         for back_button in back_to_task_sprite:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and back_button.rect.collidepoint(args[0].pos):
                 running_condition = False
-                running_island = True
-                self.exercise_open(self.number, self.task)
+                task_start = True
+                print(self.number, self.task)
+                screen.blit(render_text_task(self.task, self.number), (0, 0))
 
 
     def generate_task_1(self, text):
