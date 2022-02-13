@@ -11,6 +11,7 @@ FPS = 50
 SIZE = WIDTH, HEIGHT = 1500, 937
 BACKGROUND = pygame.color.Color('lightskyblue')
 input_text = ''
+all_condition = ''
 number = 0
 money = 0
 level = 0
@@ -29,13 +30,13 @@ island_sprites = pygame.sprite.Group()
 control_sprite = pygame.sprite.Group()
 next_sprite = pygame.sprite.Group()
 leave_sprite = pygame.sprite.Group()
+condition_sprite = pygame.sprite.Group()
 back_to_task_sprite = pygame.sprite.Group()
 
 
 def render_text_task(text, number=None):  # number - номер аздания для его печати в диалоговом окне
     """возвращает text в виде картинки на фоне города с дождем"""
     global backgrnd
-    count = 0
     y = 0
     string = ''
     font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 70)
@@ -49,7 +50,6 @@ def render_text_task(text, number=None):  # number - номер аздания �
     text = text[2:-3]
     text = text.split()
     for word in text:
-        count += 1
         string += word
         string += ' '
         text_task = font.render(str(string), True, (0, 0, 0))
@@ -58,19 +58,17 @@ def render_text_task(text, number=None):  # number - номер аздания �
             text_task = font.render(str(string), True, (0, 0, 0))
             backgrnd.blit(text_task, (100, 650 + y))
             y += 35
-            count = 0
             string = ''
         elif text_task.get_size()[0] == 1200:
             backgrnd.blit(text_task, (100, 650 + y))
             y += 35
-            count = 0
             string = ''
         elif text_task.get_size()[0] < 1200 and text.index(word) == len(text) - 1:
             backgrnd.blit(text_task, (100, 650 + y))
     next_sprite.draw(backgrnd)
     next_sprite.clear(screen, screen)
-    back_to_task_sprite.draw(backgrnd)
-    back_to_task_sprite.clear(screen, screen)
+    condition_sprite.draw(backgrnd)
+    condition_sprite.clear(screen, screen)
     return backgrnd
 
 
@@ -178,7 +176,6 @@ class IslandImage(pygame.sprite.Sprite):
         global tasks
         tasks.append(self)
 
-
 ISLAND_COORDINATES = {
     1: (263, 255),
     2: (587, 390),
@@ -210,7 +207,7 @@ NAMES_GIRLS_EDIT = ['Лизы', 'Оли', 'Самиры', 'Кати', 'Маши'
 class Island:
     def __init__(self):
         global next
-        global next_sprite, back_to_task_sprite
+        global next_sprite, condition_sprite, back_to_task_sprite
         self.input_answer = input_text
         self.task = None
         self.number = 0
@@ -229,14 +226,42 @@ class Island:
         self.open_condition_button.rect = self.open_condition_button.image.get_rect()
         self.open_condition_button.rect.x = 1150
         self.open_condition_button.rect.y = 825
-        back_to_task_sprite.add(self.open_condition_button)
+        condition_sprite.add(self.open_condition_button)
+        self.return_button = pygame.sprite.Sprite()
+        self.return_button.image = load_image('белая_стрелка.png')
+        self.return_button.image = pygame.transform.scale(self.return_button.image, (70, 70))
+        self.return_button.rect = self.return_button.image.get_rect()
+        self.return_button.rect.x = 1400
+        self.return_button.rect.y = 40
+        back_to_task_sprite.add(self.return_button)
 
-    def open_condition(self, running_condition):
-        global task_start, for_condition
-        if running_condition:
+    def open_condition(self, text):
+        global task_start, for_condition, running_condition
+        while running_condition:
             task_start = False
             for_condition = pygame.transform.scale(load_image("полное_условие.jpeg"), (1500, 937))
-
+            font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 37)
+            text = text[2:-3]
+            text = text.split()
+            string = ''
+            y = 0
+            for word in text:
+                string += word
+                string += ' '
+                text_task = font.render(str(string), True, (0, 0, 0))
+                if text_task.get_size()[0] > 900:
+                    string = string[:-(len(word) + 1)]
+                    text_task = font.render(str(string), True, (0, 0, 0))
+                    for_condition.blit(text_task, (90, 50 + y))
+                    y += 35
+                    string = word + ' '
+                elif text_task.get_size()[0] == 900:
+                    for_condition.blit(text_task, (90, 50 + y))
+                    y += 35
+                    string = ''
+                elif text_task.get_size()[0] < 900 and text.index(word) <= len(text) - 3:
+                    for_condition.blit(text_task, (90, 50 + y))
+            back_to_task_sprite.draw(for_condition)
             return for_condition
 
     def set_answer(self, answer):
@@ -289,12 +314,12 @@ class Island:
             screen.blit(result, (10, 10))
 
     def get_event(self, *args):
-        global task_made, running_island, running, running_start, task_start, back_to_task_sprite
-        global money, level, input_text, nick_name, running_condition
+        global task_made, running_island, running, running_start, task_start, condition_sprite
+        global money, level, input_text, nick_name, running_condition, back_to_task_sprite, all_condition
         for button in tasks:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and button.rect.collidepoint(args[0].pos):
                 task_start = True
-                self.task = Task(button.task_id)  # task_id должен быть записан при создании спрайта
+                Task(button.task_id)  # task_id должен быть записан при создании спрайта
         for arrow in next:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and arrow.rect.collidepoint(args[0].pos):
                 task_start = False
@@ -326,100 +351,104 @@ class Island:
                 con.commit()
                 con.close()
                 running_island = running = running_start = False
-        for condition_button in back_to_task_sprite:
+        for condition_button in condition_sprite:
             if args and args[0].type == pygame.MOUSEBUTTONDOWN and condition_button.rect.collidepoint(args[0].pos):
                 running_condition = True
-                screen.blit(self.open_condition(running_condition), (0, 0))
+                screen.blit(self.open_condition(all_condition), (0, 0))
+        for back_button in back_to_task_sprite:
+            if args and args[0].type == pygame.MOUSEBUTTONDOWN and back_button.rect.collidepoint(args[0].pos):
+                running_condition = False
+                running_island = True
+                self.exercise_open(self.number, self.task)
 
 
-def generate_task_1(text):
-    umbrella = random.randint(19, 30)
-    handle = round(random.uniform(4, 10), 1)
-    answer_1 = round((3 * (umbrella - handle)), 1)
-    print(answer_1)
-    return text.format(umbrella=umbrella, handle=handle), answer_1
+    def generate_task_1(self, text):
+        umbrella = random.randint(19, 30)
+        handle = round(random.uniform(4, 10), 1)
+        answer_1 = round((3 * (umbrella - handle)), 1)
+        print(answer_1)
+        return text.format(umbrella=umbrella, handle=handle), answer_1
 
 
-def generate_task_2(text, ends, boy):
-    h_2 = round(random.uniform(50, 70), 1)
-    s = (1 / 2) * ends * h_2
-    answer_2 = round((s * 2))
-    return text.format(name=boy, h=h_2), answer_2
+    def generate_task_2(self, text, ends, boy):
+        h_2 = round(random.uniform(50, 70), 1)
+        s = (1 / 2) * ends * h_2
+        answer_2 = round((s * 2))
+        return text.format(name=boy, h=h_2), answer_2
 
 
-def generate_task_3(text, r, boy):
-    answer = (r ** 2 + (r * 2) ** 2) / (r * 2)
-    return text.format(name=boy, r=r), answer
+    def generate_task_3(self, text, r, boy):
+        answer = (r ** 2 + (r * 2) ** 2) / (r * 2)
+        return text.format(name=boy, r=r), answer
 
 
-def generate_task_4(text, h, d, girl, girl_edit):
-    answer = round(2 * 3.14 * h * (d / 2))
-    return text.format(girl=girl, girl_edit=girl_edit), answer
+    def generate_task_4(self, text, h, d, girl, girl_edit):
+        answer = round(2 * 3.14 * h * (d / 2))
+        return text.format(girl=girl, girl_edit=girl_edit), answer
 
 
-def generate_task_5(text, num, a, b, S, girl_edit, boy_edit):
-    all_wedges = 12 * num  # тк 12 клиньев на одном зонте
-    wedges = (all_wedges * S) / 10000  # клинья
-    roll = a * b * 0.01  # рулон
-    rest = round((roll - wedges), 2)  # обрезки
-    answer = round(((rest / roll) * 100), 2)
-    return text.format(a=a, b=b, num=num, S=S, girl=girl_edit, boy=boy_edit), answer
+    def generate_task_5(self, text, num, a, b, S, girl_edit, boy_edit):
+        all_wedges = 12 * num  # тк 12 клиньев на одном зонте
+        wedges = (all_wedges * S) / 10000  # клинья
+        roll = a * b * 0.01  # рулон
+        rest = round((roll - wedges), 2)  # обрезки
+        answer = round(((rest / roll) * 100), 2)
+        return text.format(a=a, b=b, num=num, S=S, girl=girl_edit, boy=boy_edit), answer
 
 
-def generate_task(id, **args):
-    global answer
-    global number
-    con = sqlite3.connect('data/text_of_task_and_exercises.db')
-    cur = con.cursor()
-    text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", (id,)).fetchone())
-    all_condition = str(cur.execute("SELECT text FROM task_exercises WHERE id = 6").fetchone())
+    def generate_task(self, id, **args):
+        global answer, number, all_condition
+        con = sqlite3.connect('data/text_of_task_and_exercises.db')
+        cur = con.cursor()
+        text = str(cur.execute("SELECT text FROM task_exercises WHERE id = ?", (id,)).fetchone())
+        all_condition = str(cur.execute("SELECT text FROM task_exercises WHERE id = 6").fetchone())
 
-    if 'ends' not in args:
-        args['ends'] = random.randint(25, 33)  # расстояние между спицами
-    if 'h' not in args:
-        args['h'] = random.randint(24, 38)  # высота купола
-    if 'd' not in args:
-        args['d'] = random.randint(90, 120)  # расстояние между концами спиц
-    if 'h_2' not in args:
-        args['h_2'] = round(random.uniform(50, 70), 1)
-    if 'r' not in args:
-        args['r'] = random.randint(25, 40)
-    if 'a' not in args:
-        args['a'] = random.randint(30, 51)  # длина
-        args['b'] = random.randint(70, 151)  # ширина
-        args['S'] = random.randint(600, 1301)
-        while args['a'] % 10 != 0 or args['b'] % 10 != 0 or args['S'] % 50 != 0:
+        if 'ends' not in args:
+            args['ends'] = random.randint(25, 33)  # расстояние между спицами
+        if 'h' not in args:
+            args['h'] = random.randint(24, 38)  # высота купола
+        if 'd' not in args:
+            args['d'] = random.randint(90, 120)  # расстояние между концами спиц
+        if 'h_2' not in args:
+            args['h_2'] = round(random.uniform(50, 70), 1)
+        if 'r' not in args:
+            args['r'] = random.randint(25, 40)
+        if 'a' not in args:
             args['a'] = random.randint(30, 51)  # длина
             args['b'] = random.randint(70, 151)  # ширина
             args['S'] = random.randint(600, 1301)
-    if 'num' not in args:
-        args['num'] = random.randint(15, 31)  # количество зонтов
+            while args['a'] % 10 != 0 or args['b'] % 10 != 0 or args['S'] % 50 != 0:
+                args['a'] = random.randint(30, 51)  # длина
+                args['b'] = random.randint(70, 151)  # ширина
+                args['S'] = random.randint(600, 1301)
+        if 'num' not in args:
+            args['num'] = random.randint(15, 31)  # количество зонтов
 
-    boy = random.choice(NAMES_BOYS)
-    girl = random.choice(NAMES_GIRLS)
-    boy_edit = NAMES_BOYS_EDIT[NAMES_BOYS.index(boy)]
-    girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
+        boy = random.choice(NAMES_BOYS)
+        girl = random.choice(NAMES_GIRLS)
+        boy_edit = NAMES_BOYS_EDIT[NAMES_BOYS.index(boy)]
+        girl_edit = NAMES_GIRLS_EDIT[NAMES_GIRLS.index(girl)]
 
-    all_condition = all_condition.format(girl=girl, boy=boy, d=args['d'], h=args['h'], ends=args['ends'])
+        all_condition = all_condition.format(girl=girl, boy=boy, d=args['d'], h=args['h'], ends=args['ends'])
 
-    if id == 1:
-        text, answer = generate_task_1(text)
-    elif id == 2:
-        text, answer = generate_task_2(text, args['ends'], boy)
-    elif id == 3:
-        text, answer = generate_task_3(text, args['r'], boy)
-    elif id == 4:
-        text, answer = generate_task_4(text, args['h'], args['d'], girl, girl_edit)
-    elif id == 5:
-        text, answer = generate_task_5(text, args['num'], args['a'], args['b'], args['S'], girl_edit, boy_edit)
-    island.exercise_open(id, text)
-    number = id
-    return text, answer
+        if id == 1:
+            text, answer = self.generate_task_1(text)
+        elif id == 2:
+            text, answer = self.generate_task_2(text, args['ends'], boy)
+        elif id == 3:
+            text, answer = self.generate_task_3(text, args['r'], boy)
+        elif id == 4:
+            text, answer = self.generate_task_4(text, args['h'], args['d'], girl, girl_edit)
+        elif id == 5:
+            text, answer = self.generate_task_5(text, args['num'], args['a'], args['b'], args['S'], girl_edit, boy_edit)
+        island.exercise_open(id, text)
+        number = id
+        return text, answer
 
 
 class Task:
     def __init__(self, number=None):  # number - номер задания, который получаем из exercise_номер_open()
-        self.text, self.true_answer = generate_task(number)
+        self.text, self.true_answer = island.generate_task(number)
 
     def check_answer(self, answer):  # answer = TEXT, возвращает True/False
         return float(answer) == self.true_answer
