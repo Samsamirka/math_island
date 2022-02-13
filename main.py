@@ -156,10 +156,14 @@ def island_screen():
                             island.set_answer(input_text)
                         input_text = ''
                     else:
-                        input_text += event.unicode
-                        font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
-                        from_player = font.render(input_text, True, (0, 100, 0))
-                        screen.blit(from_player, (100, 860))
+                        try:
+                            if event.unicode.isdigit():
+                                input_text += event.unicode
+                                font = pygame.font.Font('data/ofont.ru_AsylbekM29.kz.ttf', 35)
+                                from_player = font.render(input_text, True, (0, 100, 0))
+                                screen.blit(from_player, (100, 860))
+                        except:
+                            print('Вводить можно только числа.')
             window_surface.blit(screen, (0, 0))
         pygame.display.flip()
 
