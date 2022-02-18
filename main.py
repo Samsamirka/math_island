@@ -555,8 +555,6 @@ pygame.mixer.init()
 background_image = pygame.image.load('data/background.png')
 background_image = pygame.transform.scale(background_image, (background_image.get_width() / 1.6, background_image.get_height() // 1.6))
 
-to_return = False
-
 pygame.mixer.music.load('data/music.mp3')
 music_playing = True
 pygame.mixer.music.play()
