@@ -467,7 +467,6 @@ WIDTH, HEIGHT = 1500, 937
 COLOR_ACTIVE = pygame.Color('white')
 COLOR_INACTIVE = pygame.Color((30, 30, 30))
 
-input_text = ''
 window_surface = pygame.display.set_mode((WIDTH, HEIGHT))
 
 all_sprites = pygame.sprite.Group()
