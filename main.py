@@ -641,8 +641,7 @@ def open_settings(clock: pygame.time.Clock):
         window_surface.blit(set_r, (430, 130))
         window_surface.blit(authors, (700, 380))
         window_surface.blit(name1, (650, 460))
-        window_surface.blit(name2, (650, 500))
-        window_surface.blit(name3, (650, 540))
+        window_surface.blit(name3, (650, 500))
 
         window_surface.blit(set_txt, (600, 200))
 
